@@ -34,7 +34,7 @@ void ui_render(Canvas* canvas, GameState* state) {
             TileType tile = state->map.tiles[map_x][map_y];
             
             if (tile == TILE_WALL) {
-                canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 2, TILE_SIZE - 2);
+                canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             } else if (tile == TILE_FLOOR) {
                 canvas_draw_dot(canvas, screen_x + TILE_SIZE/2 - 1, screen_y + TILE_SIZE/2 - 1);
             } else if (tile == TILE_STAIRS_UP) {

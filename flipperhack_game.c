@@ -108,6 +108,8 @@ void game_init(GameState* state) {
     potion.equipped = false;
     state->player.inventory[0] = potion;
     state->player.inventory_count = 1;
+
+    state->dungeon_level = 1;
     
     map_place_player(&state->map, &state->player);
     
@@ -188,27 +190,36 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         
         if (key == InputKeyUp) {
             state->menu_selection--;
-            if (state->menu_selection < 0) state->menu_selection = 3;
+            if (state->menu_selection < 0)
+                state->menu_selection = 3;
         } else if (key == InputKeyDown) {
             state->menu_selection++;
-            if (state->menu_selection > 3) state->menu_selection = 0;
+            if (state->menu_selection > 3)
+                state->menu_selection = 0;
         } else if (key == InputKeyOk) {
             switch(state->menu_selection) {
                 case 0: // New Game
                     game_init(state);
                     break;
                 case 1: // Stairs
+                    char buffer[64];
                     if (state->map.tiles[state->player.x][state->player.y] == TILE_STAIRS_DOWN) {
                         // Go down (Generate new map for now)
                         map_generate(&state->map);
                         map_place_stairs(&state->map);
                         map_place_player(&state->map, &state->player);
                         map_spawn_enemies(state);
-                        log_msg(state, "Descended stairs.");
                         state->mode = GAME_MODE_PLAYING;
+                        state->dungeon_level++;
+                        memset(buffer, 0, sizeof(buffer));
+                        snprintf(buffer, sizeof(buffer), "Descended stairs. Level %d", state->dungeon_level);
+                        log_msg(state, buffer);
                     } else if (state->map.tiles[state->player.x][state->player.y] == TILE_STAIRS_UP) {
-                        log_msg(state, "Ascended stairs.");
+                        memset(buffer, 0, sizeof(buffer));
+                        snprintf(buffer, sizeof(buffer), "Ascended stairs. Level %d", state->dungeon_level);
+                        log_msg(state, buffer);
                         state->mode = GAME_MODE_PLAYING;
+                        state->dungeon_level--;
                     } else {
                         log_msg(state, "No stairs here.");
                         state->mode = GAME_MODE_PLAYING;

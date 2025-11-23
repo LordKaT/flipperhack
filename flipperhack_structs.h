@@ -97,6 +97,7 @@ typedef struct {
     int menu_selection;
     int selected_item_index; // For inventory
 
+    short int dungeon_level; // Dungeon level
     unsigned int turn_counter; // Turn counter
     
     // Logging

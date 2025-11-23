@@ -43,6 +43,9 @@ int32_t flipperhack_app(void* p) {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     
     InputEvent event;
+
+    FURI_LOG_E("flipperhack", "Game loaded");
+
     while(1) {
         if(furi_message_queue_get(app->input_queue, &event, 100) == FuriStatusOk) {
             furi_mutex_acquire(app->mutex, FuriWaitForever);
