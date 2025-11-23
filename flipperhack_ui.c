@@ -34,9 +34,9 @@ void ui_render(Canvas* canvas, GameState* state) {
             TileType tile = state->map.tiles[map_x][map_y];
             
             if (tile == TILE_WALL) {
-                canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE, TILE_SIZE);
+                canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 2, TILE_SIZE - 2);
             } else if (tile == TILE_FLOOR) {
-                canvas_draw_dot(canvas, screen_x + TILE_SIZE/2, screen_y + TILE_SIZE/2);
+                canvas_draw_dot(canvas, screen_x + TILE_SIZE/2 - 1, screen_y + TILE_SIZE/2 - 1);
             } else if (tile == TILE_STAIRS_UP) {
                 canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "<");
             } else if (tile == TILE_STAIRS_DOWN) {
@@ -56,14 +56,15 @@ void ui_render(Canvas* canvas, GameState* state) {
             int screen_x = (e->x - state->camera_x) * TILE_SIZE;
             int screen_y = (e->y - state->camera_y) * TILE_SIZE + 12;
             
-            canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, "E");
+            canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &state->enemies[i].glyph);
         }
     }
     
     // Draw Player
     int p_screen_x = (state->player.x - state->camera_x) * TILE_SIZE;
     int p_screen_y = (state->player.y - state->camera_y) * TILE_SIZE + 12;
-    canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2, p_screen_y + TILE_SIZE/2, TILE_SIZE/2 - 1);
+    canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2 -1, p_screen_y + TILE_SIZE/2 - 1, TILE_SIZE/2 - 1);
+    //canvas_draw_str(canvas, p_screen_x, p_screen_y + TILE_SIZE, &state->player.glyph);
     
     // Draw HUD
     canvas_set_font(canvas, FontSecondary);

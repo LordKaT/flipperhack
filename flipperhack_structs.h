@@ -96,6 +96,8 @@ typedef struct {
     int camera_y;
     int menu_selection;
     int selected_item_index; // For inventory
+
+    unsigned int turn_counter; // Turn counter
     
     // Logging
     char log_message[64];

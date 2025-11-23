@@ -74,7 +74,7 @@ static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
     entity->y = new_y;
 
     // Heal
-    if (entity == &state->player) {
+    if (entity == &state->player && state->turn_counter % 5 == 0) {
         entity->hp += 1;
         if (entity->hp > entity->max_hp) {
             entity->hp = entity->max_hp;
@@ -127,16 +127,37 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         bool moved = false;
         
         switch(key) {
-            case InputKeyUp: dy = -1; moved = true; break;
-            case InputKeyDown: dy = 1; moved = true; break;
-            case InputKeyLeft: dx = -1; moved = true; break;
-            case InputKeyRight: dx = 1; moved = true; break;
-            case InputKeyOk: state->mode = GAME_MODE_MENU; return;
-            default: break;
+            case InputKeyUp:
+                dy = -1;
+                moved = true; 
+                break;
+            case InputKeyDown:
+                dy = 1;
+                moved = true; 
+                break;
+            case InputKeyLeft:
+                dx = -1;
+                moved = true; 
+                break;
+            case InputKeyRight:
+                dx = 1;
+                moved = true; 
+                break;
+            case InputKeyOk:
+                if (type == InputTypeLong) {
+                    state->mode = GAME_MODE_MENU;
+                    return;
+                } else if (type == InputTypeShort) {
+                    moved = true;
+                }
+                break;
+            default:
+                break;
         }
         
         if (moved) {
             move_entity(state, &state->player, dx, dy);
+            state->turn_counter++;
             
             // Enemy turn
             for(int i=0; i<state->enemy_count; i++) {
@@ -167,10 +188,10 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         
         if (key == InputKeyUp) {
             state->menu_selection--;
-            if (state->menu_selection < 0) state->menu_selection = 5;
+            if (state->menu_selection < 0) state->menu_selection = 3;
         } else if (key == InputKeyDown) {
             state->menu_selection++;
-            if (state->menu_selection > 5) state->menu_selection = 0;
+            if (state->menu_selection > 3) state->menu_selection = 0;
         } else if (key == InputKeyOk) {
             switch(state->menu_selection) {
                 case 0: // New Game
