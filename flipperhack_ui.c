@@ -1,14 +1,26 @@
-#include "flipperhack_ui.h"
 #include <stdio.h>
+#include "flipperhack_ui.h"
+
+#include "title.xbm"
 
 #define TILE_SIZE 6
 #define VIEW_WIDTH (128 / TILE_SIZE)
 #define VIEW_HEIGHT ((64 - 12) / TILE_SIZE) // Reserve 12px for HUD
 
+void ui_draw_title(Canvas* canvas) {
+    canvas_clear(canvas);
+    canvas_draw_xbm(canvas, 0, 0, title_width, title_height, title_bits);
+}
+
 void ui_render(Canvas* canvas, GameState* state) {
     if (!state) return;
 
     canvas_clear(canvas);
+
+    if (state->mode == GAME_MODE_TITLE) {
+        ui_draw_title(canvas);
+        return;
+    }
     
     // Update Camera to center on player
     state->camera_x = state->player.x - VIEW_WIDTH / 2;

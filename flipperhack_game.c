@@ -124,7 +124,13 @@ void game_init(GameState* state) {
 void game_handle_input(GameState* state, InputKey key, InputType type) {
     if (type != InputTypeShort && type != InputTypeLong) return;
     
-    if (state->mode == GAME_MODE_PLAYING) {
+    if (state->mode == GAME_MODE_TITLE) {
+        if (key == InputKeyOk) {
+            state->mode = GAME_MODE_PLAYING;
+            game_init(state);
+        }
+        return;
+    } else if (state->mode == GAME_MODE_PLAYING) {
         int dx = 0, dy = 0;
         bool moved = false;
         

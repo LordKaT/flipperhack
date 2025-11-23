@@ -75,6 +75,7 @@ typedef struct {
 } Map;
 
 typedef enum {
+    GAME_MODE_TITLE,
     GAME_MODE_PLAYING,
     GAME_MODE_MENU,
     GAME_MODE_INVENTORY,

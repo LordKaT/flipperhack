@@ -33,7 +33,8 @@ int32_t flipperhack_app(void* p) {
     app->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     
-    game_init(app->game_state);
+    //game_init(app->game_state);
+    app->game_state->mode = GAME_MODE_TITLE;
     
     app->view_port = view_port_alloc();
     view_port_draw_callback_set(app->view_port, draw_callback, app);
