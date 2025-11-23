@@ -1,15 +1,30 @@
+#include <furi.h>
 #include <stdio.h>
+#include <storage/storage.h>
 #include "flipperhack_ui.h"
-
-#include "title.xbm"
+#include "flipperhack_title.h"
 
 #define TILE_SIZE 6
 #define VIEW_WIDTH (128 / TILE_SIZE)
 #define VIEW_HEIGHT ((64 - 12) / TILE_SIZE) // Reserve 12px for HUD
 
 void ui_draw_title(Canvas* canvas) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
     canvas_clear(canvas);
-    canvas_draw_xbm(canvas, 0, 0, title_width, title_height, title_bits);
+
+    bool ok = draw_title_from_b64_stream(
+        canvas,
+        storage,
+        "/ext/apps_data/flipperhack/title.bin.b64",
+        0,
+        0);
+
+    if(!ok) {
+        canvas_draw_str(canvas, 0, 10, "Missing/Bad title.bin.b64");
+    }
+
+    furi_record_close(RECORD_STORAGE);
 }
 
 void ui_render(Canvas* canvas, GameState* state) {
