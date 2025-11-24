@@ -1,6 +1,6 @@
 App(
     appid="flipperhack",
-    name="App flipperhack",
+    name="Flipperhack",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipperhack_app",
     stack_size=2 * 1024,

@@ -6,35 +6,25 @@ A roguelike game for the Flipper Zero.
 ### Build
 
 ```bash
-ufbt build
+make clean
+make build
+make package
+make install
 ```
 
-Use ImageMagick to convert assets/title.png to scratch/raw_title.bin:
-
-```bash
-convert assets/title.png -resize 128x64\! -threshold 50% -depth 1 gray:scratch/raw_title.bin
-```
-
-Now use the build scripts to convert to proper bin, b64 encode, and push to flipper:
-
-```bash
-./build/convert_to_bin.py scratch/raw_title.bin data/title.bin
-./build/push_to_flipper.py data/title.bin
-```
-
-
-### Installation
+### Installation & Running
 
 ```bash
 python ./install.py # install to flipper
 python ./install.py --launch # install to flipper and launch
 ```
 
-Manual installation:
+You should now be able to run flipperhack from the app menu.
 
-- Install to /ext/apps/Games/flipperhack.fap
-- Install data to /ext/apps_data/flipperhack/
+### Manual Installation
 
+- Install flipperhack.fap to /ext/apps/Games/
+- Install everything in ./data to /ext/apps_data/flipperhack/
 
 ### Controls
 
@@ -42,3 +32,4 @@ Manual installation:
 - Bump: attack
 - Center button (short): wait
 - Center button (long): menu
+- Back button: menu

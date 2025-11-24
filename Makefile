@@ -75,4 +75,9 @@ clean-raw:
 clean-bin:
 	rm -f $(DATA_DIR)/*.bin
 
-.PHONY: package build assets clean clean-raw clean-bin
+install:
+	python ./install.py
+
+all: clean build assets package install
+
+.PHONY: all package build assets clean clean-raw clean-bin install
