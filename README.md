@@ -26,7 +26,8 @@ Now use the build scripts to convert to proper bin, b64 encode, and push to flip
 ### Installation
 
 ```bash
-python ./install.py
+python ./install.py # install to flipper
+python ./install.py --launch # install to flipper and launch
 ```
 
 Manual installation:
