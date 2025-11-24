@@ -25,11 +25,14 @@ Now use the build scripts to convert to proper bin, b64 encode, and push to flip
 
 ### Installation
 
-Not automated yet.
+```bash
+python ./install.py
+```
 
-Install to /ext/apps/Games/flipperhack.fap
+Manual installation:
 
-Data to /ext/apps_data/flipperhack/
+- Install to /ext/apps/Games/flipperhack.fap
+- Install data to /ext/apps_data/flipperhack/
 
 
 ### Controls

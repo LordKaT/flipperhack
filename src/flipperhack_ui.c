@@ -13,15 +13,34 @@ void ui_draw_title(Canvas* canvas) {
 
     canvas_clear(canvas);
 
-    bool ok = draw_title_from_b64_stream(
+    bool ok = draw_bin_image(
         canvas,
         storage,
-        "/ext/apps_data/flipperhack/title.bin.b64",
+        "/ext/apps_data/flipperhack/title.bin",
         0,
         0);
 
     if(!ok) {
-        canvas_draw_str(canvas, 0, 10, "Missing/Bad title.bin.b64");
+        canvas_draw_str(canvas, 0, 10, "Missing/Bad title.bin");
+    }
+
+    furi_record_close(RECORD_STORAGE);
+}
+
+void ui_draw_image(Canvas* canvas, const char* path) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    canvas_clear(canvas);
+
+    bool ok = draw_bin_image(
+        canvas,
+        storage,
+        path,
+        0,
+        0);
+
+    if(!ok) {
+        canvas_draw_str(canvas, 0, 10, "Missing/Bad image");
     }
 
     furi_record_close(RECORD_STORAGE);
@@ -33,7 +52,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     canvas_clear(canvas);
 
     if (state->mode == GAME_MODE_TITLE) {
-        ui_draw_title(canvas);
+        ui_draw_image(canvas, "/ext/apps_data/flipperhack/title.bin");
         return;
     }
     
@@ -111,26 +130,25 @@ void ui_render(Canvas* canvas, GameState* state) {
     // Draw Menu Overlay
     if (state->mode == GAME_MODE_MENU) {
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 10, 10, 108, 50);
+        canvas_draw_box(canvas, 5, 2, 108, 55);
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 10, 10, 108, 50);
+        canvas_draw_frame(canvas, 5, 2, 108, 55);
         
-        canvas_draw_str(canvas, 15, 20, "Menu");
+        canvas_draw_str(canvas, 10, 10, "Menu");
         
         const char* options[] = {
-            "New Game",
             "Stairs",
             "Inventory",
-            "Equipment"
-            //"Return",
-            //"Quit"
+            "Equipment",
+            "New Game",
+            "Quit"
         };
         
-        for(int i=0; i<4; i++) {
+        for(int i=0; i<5; i++) {
             if (i == state->menu_selection) {
-                canvas_draw_str(canvas, 15, 30 + i*8, ">");
+                canvas_draw_str(canvas, 15, 20 + i*8, ">");
             }
-            canvas_draw_str(canvas, 25, 30 + i*8, options[i]);
+            canvas_draw_str(canvas, 25, 20 + i*8, options[i]);
         }
     } else if (state->mode == GAME_MODE_INVENTORY) {
         canvas_set_color(canvas, ColorWhite);
@@ -167,11 +185,7 @@ void ui_render(Canvas* canvas, GameState* state) {
             canvas_draw_str(canvas, 10, 25 + i*8, buf);
         }
     } else if (state->mode == GAME_MODE_GAME_OVER) {
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 5, 5, 118, 54);
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 5, 5, 118, 54);
-        canvas_draw_str(canvas, 10, 15, "Game Over");
-        canvas_draw_str(canvas, 10, 25, "Press any key to try again");
+        ui_draw_image(canvas, "/ext/apps_data/flipperhack/gameover.bin");
+        return;
     }
 }

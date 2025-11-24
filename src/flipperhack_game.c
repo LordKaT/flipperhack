@@ -118,7 +118,7 @@ void game_init(GameState* state) {
         snprintf(state->enemies[i].name, 32, "Goblin");
     }
     
-    log_msg(state, "Welcome to FlipperHack!");
+    log_msg(state, "Welcome to FlipperHack 0.01a!");
 }
 
 void game_handle_input(GameState* state, InputKey key, InputType type) {
@@ -197,17 +197,14 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         if (key == InputKeyUp) {
             state->menu_selection--;
             if (state->menu_selection < 0)
-                state->menu_selection = 3;
+                state->menu_selection = 4;
         } else if (key == InputKeyDown) {
             state->menu_selection++;
-            if (state->menu_selection > 3)
+            if (state->menu_selection > 4)
                 state->menu_selection = 0;
         } else if (key == InputKeyOk) {
             switch(state->menu_selection) {
-                case 0: // New Game
-                    game_init(state);
-                    break;
-                case 1: // Stairs
+                case 0: // Stairs
                     char buffer[64];
                     if (state->map.tiles[state->player.x][state->player.y] == TILE_STAIRS_DOWN) {
                         // Go down (Generate new map for now)
@@ -231,24 +228,19 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                         state->mode = GAME_MODE_PLAYING;
                     }
                     break;
-                case 2: // Inventory
+                case 1: // Inventory
                     state->mode = GAME_MODE_INVENTORY;
                     state->selected_item_index = 0;
                     break;
-                case 3: // Equipment
+                case 2: // Equipment
                     state->mode = GAME_MODE_EQUIPMENT;
                     break;
-                case 4: // Return
-                    state->mode = GAME_MODE_PLAYING;
+                case 3: // New Game
+                    game_init(state);
                     break;
-                case 5: // Quit
-                    // Handled by main loop if we set a flag or just let Back handle it?
-                    // We can't exit from here easily without a flag in state.
-                    // Let's assume Back from Menu exits if we want, or we need a Quit flag.
-                    // For now, let's just return to game and log "Use Back to Quit".
-                    state->mode = GAME_MODE_PLAYING;
-                    log_msg(state, "Hold Back to Quit");
-                    break;
+                case 4: // Quit
+                    state->mode = GAME_MODE_QUIT;
+                    return;
             }
         }
     } else if (state->mode == GAME_MODE_INVENTORY) {

@@ -81,7 +81,8 @@ typedef enum {
     GAME_MODE_INVENTORY,
     GAME_MODE_EQUIPMENT,
     GAME_MODE_ITEM_ACTION,
-    GAME_MODE_GAME_OVER
+    GAME_MODE_GAME_OVER,
+    GAME_MODE_QUIT
 } GameMode;
 
 typedef struct {

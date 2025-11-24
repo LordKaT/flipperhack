@@ -123,3 +123,37 @@ bool draw_title_from_b64_stream(Canvas* canvas, Storage* storage,
     storage_file_free(file);
     return ok;
 }
+
+// Stream-read binary file and draw directly to canvas
+bool draw_bin_image(Canvas* canvas, Storage* storage, const char* path, int x0, int y0) {
+    File* file = storage_file_alloc(storage);
+    bool ok = false;
+
+    if(!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(file);
+        return false;
+    }
+
+    int pixel_index = 0;
+    canvas_set_color(canvas, ColorBlack);
+
+    // Buffer for reading chunks
+    uint8_t buffer[64]; 
+    while(pixel_index < TITLE_PIXELS) {
+        uint16_t read_count = storage_file_read(file, buffer, sizeof(buffer));
+        if(read_count == 0) break;
+
+        for(uint16_t i = 0; i < read_count; i++) {
+            emit_byte_as_pixels(canvas, buffer[i], &pixel_index, x0, y0);
+            if(pixel_index >= TITLE_PIXELS) break;
+        }
+    }
+
+    if(pixel_index >= TITLE_PIXELS) {
+        ok = true;
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+    return ok;
+}

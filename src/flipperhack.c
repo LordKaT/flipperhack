@@ -48,16 +48,20 @@ int32_t flipperhack_app(void* p) {
     FURI_LOG_E("flipperhack", "Game loaded");
 
     while(1) {
-        if(furi_message_queue_get(app->input_queue, &event, 100) == FuriStatusOk) {
+        if (app->game_state->mode == GAME_MODE_QUIT) {
+            break;
+        }
+        if (furi_message_queue_get(app->input_queue, &event, 100) == FuriStatusOk) {
             furi_mutex_acquire(app->mutex, FuriWaitForever);
-            if(event.type == InputTypeShort || event.type == InputTypeLong) {
-                if(event.key == InputKeyBack) {
+            if (event.type == InputTypeShort || event.type == InputTypeLong) {
+                if (event.key == InputKeyBack) {
                     if (app->game_state->mode == GAME_MODE_PLAYING) {
-                        // TODO: Back currently exits app, but it should confirm first.
-                        furi_mutex_release(app->mutex);
-                        break;
+                        //furi_mutex_release(app->mutex);
+                        app->game_state->mode = GAME_MODE_MENU;
                     } else if (app->game_state->mode == GAME_MODE_MENU) {
                         app->game_state->mode = GAME_MODE_PLAYING;
+                    } else if (app->game_state->mode == GAME_MODE_TITLE || app->game_state->mode == GAME_MODE_GAME_OVER) {
+                        game_init(app->game_state);
                     } else {
                         // Go back to previous state (Menu)
                         app->game_state->mode = GAME_MODE_MENU;
