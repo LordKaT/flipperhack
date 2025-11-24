@@ -16,7 +16,9 @@ static int random_int(int min, int max) {
 void map_init(Map* map) {
     for(int x = 0; x < MAP_WIDTH; x++) {
         for(int y = 0; y < MAP_HEIGHT; y++) {
-            map->tiles[x][y] = TILE_EMPTY; // Treated as wall/void
+            map->tiles[x][y].type = TILE_EMPTY; // Treated as wall/void
+            map->tiles[x][y].visible = false;
+            map->tiles[x][y].explored = false;
         }
     }
 }
@@ -24,7 +26,7 @@ void map_init(Map* map) {
 static void create_room(Map* map, Rect room) {
     for(int x = room.x + 1; x < room.x + room.w - 1; x++) {
         for(int y = room.y + 1; y < room.y + room.h - 1; y++) {
-            map->tiles[x][y] = TILE_FLOOR;
+            map->tiles[x][y].type = TILE_FLOOR;
         }
     }
     // Walls are implicit around the floor in TILE_EMPTY or explicit TILE_WALL
@@ -35,8 +37,8 @@ static void create_room(Map* map, Rect room) {
         for(int y = room.y; y < room.y + room.h; y++) {
             if (x == room.x || x == room.x + room.w - 1 || 
                 y == room.y || y == room.y + room.h - 1) {
-                if (map->tiles[x][y] != TILE_FLOOR) {
-                    map->tiles[x][y] = TILE_WALL;
+                if (map->tiles[x][y].type != TILE_FLOOR) {
+                    map->tiles[x][y].type = TILE_WALL;
                 }
             }
         }
@@ -47,10 +49,10 @@ static void create_h_tunnel(Map* map, int x1, int x2, int y) {
     int start = (x1 < x2) ? x1 : x2;
     int end = (x1 < x2) ? x2 : x1;
     for(int x = start; x <= end; x++) {
-        map->tiles[x][y] = TILE_FLOOR;
+        map->tiles[x][y].type = TILE_FLOOR;
         // Optional: Walls around tunnel
-        if (y > 0 && map->tiles[x][y-1] == TILE_EMPTY) map->tiles[x][y-1] = TILE_WALL;
-        if (y < MAP_HEIGHT-1 && map->tiles[x][y+1] == TILE_EMPTY) map->tiles[x][y+1] = TILE_WALL;
+        if (y > 0 && map->tiles[x][y-1].type == TILE_EMPTY) map->tiles[x][y-1].type = TILE_WALL;
+        if (y < MAP_HEIGHT-1 && map->tiles[x][y+1].type == TILE_EMPTY) map->tiles[x][y+1].type = TILE_WALL;
     }
 }
 
@@ -58,9 +60,9 @@ static void create_v_tunnel(Map* map, int y1, int y2, int x) {
     int start = (y1 < y2) ? y1 : y2;
     int end = (y1 < y2) ? y2 : y1;
     for(int y = start; y <= end; y++) {
-        map->tiles[x][y] = TILE_FLOOR;
-        if (x > 0 && map->tiles[x-1][y] == TILE_EMPTY) map->tiles[x-1][y] = TILE_WALL;
-        if (x < MAP_WIDTH-1 && map->tiles[x+1][y] == TILE_EMPTY) map->tiles[x+1][y] = TILE_WALL;
+        map->tiles[x][y].type = TILE_FLOOR;
+        if (x > 0 && map->tiles[x-1][y].type == TILE_EMPTY) map->tiles[x-1][y].type = TILE_WALL;
+        if (x < MAP_WIDTH-1 && map->tiles[x+1][y].type == TILE_EMPTY) map->tiles[x+1][y].type = TILE_WALL;
     }
 }
 
@@ -110,7 +112,7 @@ void map_place_player(Map* map, Entity* player) {
     // Find first floor tile
     for(int x = 0; x < MAP_WIDTH; x++) {
         for(int y = 0; y < MAP_HEIGHT; y++) {
-            if (map->tiles[x][y] == TILE_FLOOR) {
+            if (map->tiles[x][y].type == TILE_FLOOR) {
                 player->x = x;
                 player->y = y;
                 return;
@@ -125,8 +127,8 @@ void map_place_stairs(Map* map) {
     while(placed < 1) {
         int x = random_int(1, MAP_WIDTH - 2);
         int y = random_int(1, MAP_HEIGHT - 2);
-        if (map->tiles[x][y] == TILE_FLOOR) {
-            map->tiles[x][y] = TILE_STAIRS_UP;
+        if (map->tiles[x][y].type == TILE_FLOOR) {
+            map->tiles[x][y].type = TILE_STAIRS_UP;
             placed++;
         }
     }
@@ -136,8 +138,8 @@ void map_place_stairs(Map* map) {
     while(placed < 1) {
         int x = random_int(1, MAP_WIDTH - 2);
         int y = random_int(1, MAP_HEIGHT - 2);
-        if (map->tiles[x][y] == TILE_FLOOR) {
-            map->tiles[x][y] = TILE_STAIRS_DOWN;
+        if (map->tiles[x][y].type == TILE_FLOOR) {
+            map->tiles[x][y].type = TILE_STAIRS_DOWN;
             placed++;
         }
     }
@@ -150,7 +152,7 @@ void map_spawn_enemies(GameState* state) {
         do {
             x = random_int(1, MAP_WIDTH - 2);
             y = random_int(1, MAP_HEIGHT - 2);
-        } while(state->map.tiles[x][y] != TILE_FLOOR);
+        } while(state->map.tiles[x][y].type != TILE_FLOOR);
         
         Entity* e = &state->enemies[state->enemy_count++];
         e->x = x;

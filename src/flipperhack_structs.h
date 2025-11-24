@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include "flipperhack_menu.h"
 
-#define MAP_WIDTH 100
-#define MAP_HEIGHT 100
+#define MAP_WIDTH 50
+#define MAP_HEIGHT 50
 #define INVENTORY_CAPACITY 25
 #define MAX_ENEMIES 50
 #define MAX_ITEMS_ON_FLOOR 50
@@ -72,7 +72,13 @@ typedef struct {
 } WorldItem;
 
 typedef struct {
-    TileType tiles[MAP_WIDTH][MAP_HEIGHT];
+    TileType type;
+    bool visible;
+    bool explored;
+} Tile;
+
+typedef struct {
+    Tile tiles[MAP_WIDTH][MAP_HEIGHT];
 } Map;
 
 typedef enum {

@@ -2,29 +2,64 @@
 #include <stdio.h>
 #include <storage/storage.h>
 #include "flipperhack_ui.h"
-#include "flipperhack_title.h"
 
+#define SCREEN_PIXELS (128 * 64)
+#define SCREEN_W 128
+#define SCREEN_H 64
 #define TILE_SIZE 6
-#define VIEW_WIDTH (128 / TILE_SIZE)
-#define VIEW_HEIGHT ((64 - 12) / TILE_SIZE) // Reserve 12px for HUD
+#define VIEW_WIDTH (SCREEN_W / TILE_SIZE)
+#define VIEW_HEIGHT ((SCREEN_H - 12) / TILE_SIZE) // Reserve 12px for HUD
 
-void ui_draw_title(Canvas* canvas) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+// Emit one decoded data byte as 8 pixels on the canvas
+void emit_byte_as_pixels(Canvas* canvas, uint8_t b, int* pixel_index, int x0, int y0) {
+    for(int bit = 7; bit >= 0; bit--) {
+        if(*pixel_index >= SCREEN_PIXELS) return;
 
-    canvas_clear(canvas);
+        int x = x0 + (*pixel_index % SCREEN_W);
+        int y = y0 + (*pixel_index / SCREEN_W);
 
-    bool ok = draw_bin_image(
-        canvas,
-        storage,
-        "/ext/apps_data/flipperhack/title.bin",
-        0,
-        0);
+        // MSB = leftmost pixel
+        bool on = (b & (1 << bit)) != 0;
+        if(on) {
+            canvas_draw_dot(canvas, x, y);
+        }
 
-    if(!ok) {
-        canvas_draw_str(canvas, 0, 10, "Missing/Bad title.bin");
+        (*pixel_index)++;
+    }
+}
+
+// Stream-read binary file and draw directly to canvas
+bool draw_bin_image(Canvas* canvas, Storage* storage, const char* path, int x0, int y0) {
+    File* file = storage_file_alloc(storage);
+    bool ok = false;
+
+    if(!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(file);
+        return false;
     }
 
-    furi_record_close(RECORD_STORAGE);
+    int pixel_index = 0;
+    canvas_set_color(canvas, ColorBlack);
+
+    // Buffer for reading chunks
+    uint8_t buffer[64]; 
+    while(pixel_index < SCREEN_PIXELS) {
+        uint16_t read_count = storage_file_read(file, buffer, sizeof(buffer));
+        if(read_count == 0) break;
+
+        for(uint16_t i = 0; i < read_count; i++) {
+            emit_byte_as_pixels(canvas, buffer[i], &pixel_index, x0, y0);
+            if(pixel_index >= SCREEN_PIXELS) break;
+        }
+    }
+
+    if(pixel_index >= SCREEN_PIXELS) {
+        ok = true;
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+    return ok;
 }
 
 void ui_draw_image(Canvas* canvas, const char* path) {
@@ -32,12 +67,7 @@ void ui_draw_image(Canvas* canvas, const char* path) {
 
     canvas_clear(canvas);
 
-    bool ok = draw_bin_image(
-        canvas,
-        storage,
-        path,
-        0,
-        0);
+    bool ok = draw_bin_image(canvas, storage, path, 0, 0);
 
     if(!ok) {
         canvas_draw_str(canvas, 0, 10, "Missing/Bad image");
@@ -78,15 +108,21 @@ void ui_render(Canvas* canvas, GameState* state) {
             int screen_x = x * TILE_SIZE;
             int screen_y = y * TILE_SIZE + 12; // Offset for HUD
             
-            TileType tile = state->map.tiles[map_x][map_y];
+            Tile tile = state->map.tiles[map_x][map_y];
             
-            if (tile == TILE_WALL) {
+            if (!tile.explored) continue; // Don't draw unexplored
+            
+            // Optional: Dim non-visible tiles? 
+            // Flipper only has 1-bit color, so we can't dim. 
+            // We could use a different pattern (e.g. dotted for walls) but let's keep it simple.
+            
+            if (tile.type == TILE_WALL) {
                 canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
-            } else if (tile == TILE_FLOOR) {
+            } else if (tile.type == TILE_FLOOR) {
                 canvas_draw_dot(canvas, screen_x + TILE_SIZE/2 - 1, screen_y + TILE_SIZE/2 - 1);
-            } else if (tile == TILE_STAIRS_UP) {
+            } else if (tile.type == TILE_STAIRS_UP) {
                 canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "<");
-            } else if (tile == TILE_STAIRS_DOWN) {
+            } else if (tile.type == TILE_STAIRS_DOWN) {
                 canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, ">");
             }
         }
@@ -100,6 +136,9 @@ void ui_render(Canvas* canvas, GameState* state) {
         
         if (e->x >= state->camera_x && e->x < state->camera_x + VIEW_WIDTH &&
             e->y >= state->camera_y && e->y < state->camera_y + VIEW_HEIGHT) {
+            
+            // Only draw if visible
+            if (!state->map.tiles[e->x][e->y].visible) continue;
             
             int screen_x = (e->x - state->camera_x) * TILE_SIZE;
             int screen_y = (e->y - state->camera_y) * TILE_SIZE + 12;

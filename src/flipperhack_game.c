@@ -1,5 +1,6 @@
 #include "flipperhack_game.h"
 #include "flipperhack_map.h"
+#include "flipperhack_fov.h"
 #include <stdio.h>
 
 static void log_msg(GameState* state, const char* msg) {
@@ -56,7 +57,7 @@ static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
     if (new_x < 0 || new_x >= MAP_WIDTH || new_y < 0 || new_y >= MAP_HEIGHT) return;
     
     // Wall check
-    if (state->map.tiles[new_x][new_y] == TILE_WALL || state->map.tiles[new_x][new_y] == TILE_EMPTY) {
+    if (state->map.tiles[new_x][new_y].type == TILE_WALL || state->map.tiles[new_x][new_y].type == TILE_EMPTY) {
         if (entity == &state->player) log_msg(state, "Blocked.");
         return;
     }
@@ -125,9 +126,8 @@ void game_init(GameState* state) {
     map_place_player(&state->map, &state->player);
     
     map_spawn_enemies(state);
-    for(int i=0; i<state->enemy_count; i++) {
-        snprintf(state->enemies[i].name, 32, "Goblin");
-    }
+    
+    map_calculate_fov(state);
     
     log_msg(state, "Welcome to FlipperHack 0.01a!");
 }
@@ -187,6 +187,7 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         
         if (moved) {
             move_entity(state, &state->player, dx, dy);
+            map_calculate_fov(state);
             state->turn_counter++;
             
             // Enemy turn
@@ -221,18 +222,19 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
             switch(selection) {
                 case 0: // Stairs
                     char buffer[64];
-                    if (state->map.tiles[state->player.x][state->player.y] == TILE_STAIRS_DOWN) {
+                    if (state->map.tiles[state->player.x][state->player.y].type == TILE_STAIRS_DOWN) {
                         // Go down (Generate new map for now)
                         map_generate(&state->map);
                         map_place_stairs(&state->map);
                         map_place_player(&state->map, &state->player);
                         map_spawn_enemies(state);
+                        map_calculate_fov(state);
                         state->mode = GAME_MODE_PLAYING;
                         state->dungeon_level++;
                         memset(buffer, 0, sizeof(buffer));
                         snprintf(buffer, sizeof(buffer), "Descended stairs. Level %d", state->dungeon_level);
                         log_msg(state, buffer);
-                    } else if (state->map.tiles[state->player.x][state->player.y] == TILE_STAIRS_UP) {
+                    } else if (state->map.tiles[state->player.x][state->player.y].type == TILE_STAIRS_UP) {
                         memset(buffer, 0, sizeof(buffer));
                         snprintf(buffer, sizeof(buffer), "Ascended stairs. Level %d", state->dungeon_level);
                         log_msg(state, buffer);

@@ -32,7 +32,8 @@ $(DATA_DIR)/%.bin: $(ASSET_DIR)/raw_%.bin
 # Gather assets
 BIN_ASSETS := $(ASSETS:%=$(DATA_DIR)/%.bin)
 DAT_ASSETS := $(wildcard $(DATA_DIR)/*.dat)
-ALL_ASSETS := $(BIN_ASSETS) $(DAT_ASSETS)
+OVL_ASSETS := $(wildcard $(DATA_DIR)/ovl/*.ovl)
+ALL_ASSETS := $(BIN_ASSETS) $(DAT_ASSETS) $(OVL_ASSETS)
 
 assets: $(BIN_ASSETS)
 	@echo "Assets converted."
@@ -65,6 +66,7 @@ package: build assets
 	@echo "  dist/flipperhack.fap"
 	@echo "  dist/data/*.bin"
 	@echo "  dist/data/*.dat"
+	@echo "  dist/data/ovl/*.ovl"
 
 clean:
 	ufbt -c
