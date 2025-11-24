@@ -1,3 +1,6 @@
+// legacy base64 decoding when my install script was poop.
+// keeping it here for reference in case I need some base64 decoding again.
+
 #include <storage/storage.h>
 #include <furi.h>
 #include <gui/canvas.h>

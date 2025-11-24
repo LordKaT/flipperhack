@@ -67,12 +67,13 @@ void ui_render(Canvas* canvas, GameState* state) {
     if (state->camera_y > MAP_HEIGHT - VIEW_HEIGHT) state->camera_y = MAP_HEIGHT - VIEW_HEIGHT;
 
     // Draw Map
-    for(int x = 0; x < VIEW_WIDTH; x++) {
-        for(int y = 0; y < VIEW_HEIGHT; y++) {
+    for (int x = 0; x < VIEW_WIDTH; x++) {
+        for (int y = 0; y < VIEW_HEIGHT; y++) {
             int map_x = state->camera_x + x;
             int map_y = state->camera_y + y;
             
-            if (map_x >= MAP_WIDTH || map_y >= MAP_HEIGHT) continue;
+            if (map_x >= MAP_WIDTH || map_y >= MAP_HEIGHT)
+                continue;
             
             int screen_x = x * TILE_SIZE;
             int screen_y = y * TILE_SIZE + 12; // Offset for HUD
@@ -92,16 +93,19 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Draw Enemies
-    for(int i=0; i<state->enemy_count; i++) {
+    for (int i = 0; i < state->enemy_count; i++) {
         Entity* e = &state->enemies[i];
-        if (!e->active) continue;
+        if (!e->active)
+            continue;
         
         if (e->x >= state->camera_x && e->x < state->camera_x + VIEW_WIDTH &&
             e->y >= state->camera_y && e->y < state->camera_y + VIEW_HEIGHT) {
             
             int screen_x = (e->x - state->camera_x) * TILE_SIZE;
             int screen_y = (e->y - state->camera_y) * TILE_SIZE + 12;
-            
+            canvas_invert_color(canvas);
+            canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
+            canvas_invert_color(canvas);
             canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &state->enemies[i].glyph);
         }
     }
@@ -128,62 +132,12 @@ void ui_render(Canvas* canvas, GameState* state) {
     canvas_draw_str(canvas, 0, 10, buffer);
     
     // Draw Menu Overlay
-    if (state->mode == GAME_MODE_MENU) {
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 5, 2, 108, 55);
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 5, 2, 108, 55);
+    if (state->mode == GAME_MODE_MENU || 
+        state->mode == GAME_MODE_INVENTORY || 
+        state->mode == GAME_MODE_EQUIPMENT) {
         
-        canvas_draw_str(canvas, 10, 10, "Menu");
+        menu_draw(canvas, &state->menu);
         
-        const char* options[] = {
-            "Stairs",
-            "Inventory",
-            "Equipment",
-            "New Game",
-            "Quit"
-        };
-        
-        for(int i=0; i<5; i++) {
-            if (i == state->menu_selection) {
-                canvas_draw_str(canvas, 15, 20 + i*8, ">");
-            }
-            canvas_draw_str(canvas, 25, 20 + i*8, options[i]);
-        }
-    } else if (state->mode == GAME_MODE_INVENTORY) {
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 5, 5, 118, 54);
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 5, 5, 118, 54);
-        canvas_draw_str(canvas, 10, 15, "Inventory");
-        
-        if (state->player.inventory_count == 0) {
-            canvas_draw_str(canvas, 10, 25, "(Empty)");
-        } else {
-            for(int i=0; i<state->player.inventory_count; i++) {
-                char buf[64];
-                snprintf(buf, sizeof(buf), "%d. %s", i+1, state->player.inventory[i].name);
-                if (i == state->selected_item_index) {
-                    canvas_draw_str(canvas, 10, 25 + i*8, ">");
-                    canvas_draw_str(canvas, 20, 25 + i*8, buf);
-                } else {
-                    canvas_draw_str(canvas, 20, 25 + i*8, buf);
-                }
-            }
-        }
-    } else if (state->mode == GAME_MODE_EQUIPMENT) {
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 5, 5, 118, 54);
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 5, 5, 118, 54);
-        canvas_draw_str(canvas, 10, 15, "Equipment");
-        
-        const char* slots[] = {"Head", "Body", "Legs", "Feet", "L.Hand", "R.Hand"};
-        for(int i=0; i<6; i++) {
-            char buf[32];
-            snprintf(buf, sizeof(buf), "%s: <EMPTY>", slots[i]);
-            canvas_draw_str(canvas, 10, 25 + i*8, buf);
-        }
     } else if (state->mode == GAME_MODE_GAME_OVER) {
         ui_draw_image(canvas, "/ext/apps_data/flipperhack/gameover.bin");
         return;

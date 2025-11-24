@@ -38,6 +38,16 @@ static void attack(GameState* state, Entity* attacker, Entity* victim) {
     }
 }
 
+static void game_open_main_menu(GameState* state) {
+    state->mode = GAME_MODE_MENU;
+    menu_init(&state->menu, "Menu");
+    menu_add_item(&state->menu, "Stairs");
+    menu_add_item(&state->menu, "Inventory");
+    menu_add_item(&state->menu, "Equipment");
+    menu_add_item(&state->menu, "New Game");
+    menu_add_item(&state->menu, "Quit");
+}
+
 static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
     int new_x = entity->x + dx;
     int new_y = entity->y + dy;
@@ -85,6 +95,7 @@ static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
 
 void game_init(GameState* state) {
     state->mode = GAME_MODE_PLAYING;
+    memset(&state->menu, 0, sizeof(state->menu)); // Clear menu state
     map_generate(&state->map);
     map_place_stairs(&state->map);
     
@@ -128,6 +139,8 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         if (key == InputKeyOk) {
             state->mode = GAME_MODE_PLAYING;
             game_init(state);
+        } else if (key == InputKeyBack) {
+            state->mode = GAME_MODE_QUIT;
         }
         return;
     } else if (state->mode == GAME_MODE_PLAYING) {
@@ -153,10 +166,19 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                 break;
             case InputKeyOk:
                 if (type == InputTypeLong) {
-                    state->mode = GAME_MODE_MENU;
+                    game_open_main_menu(state);
                     return;
                 } else if (type == InputTypeShort) {
                     moved = true;
+                }
+                break;
+            case InputKeyBack:
+                if (type == InputTypeShort) {
+                    game_open_main_menu(state);
+                    return;
+                } else if (type == InputTypeLong) {
+                    state->mode = GAME_MODE_QUIT;
+                    return;
                 }
                 break;
             default:
@@ -189,21 +211,14 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
             }
         }
     } else if (state->mode == GAME_MODE_MENU) {
-        if (key == InputKeyBack) {
+        int selection = 0;
+        MenuResult result = menu_handle_input(&state->menu, key, &selection);
+        
+        if (result == MENU_RESULT_CANCELED) {
             state->mode = GAME_MODE_PLAYING;
             return;
-        }
-        
-        if (key == InputKeyUp) {
-            state->menu_selection--;
-            if (state->menu_selection < 0)
-                state->menu_selection = 4;
-        } else if (key == InputKeyDown) {
-            state->menu_selection++;
-            if (state->menu_selection > 4)
-                state->menu_selection = 0;
-        } else if (key == InputKeyOk) {
-            switch(state->menu_selection) {
+        } else if (result == MENU_RESULT_SELECTED) {
+            switch(selection) {
                 case 0: // Stairs
                     char buffer[64];
                     if (state->map.tiles[state->player.x][state->player.y] == TILE_STAIRS_DOWN) {
@@ -230,10 +245,24 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                     break;
                 case 1: // Inventory
                     state->mode = GAME_MODE_INVENTORY;
-                    state->selected_item_index = 0;
+                    menu_init(&state->menu, "Inventory");
+                    if (state->player.inventory_count == 0) {
+                        menu_add_item(&state->menu, "(Empty)");
+                    } else {
+                        for(int i=0; i<state->player.inventory_count; i++) {
+                            menu_add_item(&state->menu, state->player.inventory[i].name);
+                        }
+                    }
                     break;
                 case 2: // Equipment
                     state->mode = GAME_MODE_EQUIPMENT;
+                    menu_init(&state->menu, "Equipment");
+                    const char* slots[] = {"Head", "Body", "Legs", "Feet", "L.Hand", "R.Hand"};
+                    for(int i=0; i<6; i++) {
+                        char buf[32];
+                        snprintf(buf, sizeof(buf), "%s: <EMPTY>", slots[i]);
+                        menu_add_item(&state->menu, buf);
+                    }
                     break;
                 case 3: // New Game
                     game_init(state);
@@ -244,18 +273,48 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
             }
         }
     } else if (state->mode == GAME_MODE_INVENTORY) {
-        if (key == InputKeyBack) {
-            state->mode = GAME_MODE_MENU;
+        int selection = 0;
+        MenuResult result = menu_handle_input(&state->menu, key, &selection);
+        
+        if (result == MENU_RESULT_CANCELED) {
+            // Return to main menu
+            game_open_main_menu(state);
             return;
+        } else if (result == MENU_RESULT_SELECTED) {
+             if (state->player.inventory_count > 0) {
+                 // Use item logic here
+                 Item* item = &state->player.inventory[selection];
+                 if (item->type == ITEM_CONSUMABLE) {
+                     state->player.hp += item->hp_restore;
+                     if (state->player.hp > state->player.max_hp) state->player.hp = state->player.max_hp;
+                     
+                     char buf[64];
+                     snprintf(buf, sizeof(buf), "Used %s. HP: %d/%d", item->name, state->player.hp, state->player.max_hp);
+                     log_msg(state, buf);
+                     
+                     // Remove item (shift array)
+                     for(int i=selection; i<state->player.inventory_count-1; i++) {
+                         state->player.inventory[i] = state->player.inventory[i+1];
+                     }
+                     state->player.inventory_count--;
+                     
+                     state->mode = GAME_MODE_PLAYING;
+                 }
+             }
         }
-        // TODO: Inventory navigation
     } else if (state->mode == GAME_MODE_EQUIPMENT) {
-        if (key == InputKeyBack) {
-            state->mode = GAME_MODE_MENU;
+        int selection = 0;
+        MenuResult result = menu_handle_input(&state->menu, key, &selection);
+        
+        if (result == MENU_RESULT_CANCELED) {
+            // Return to main menu
+            game_open_main_menu(state);
             return;
         }
     } else if (state->mode == GAME_MODE_GAME_OVER) {
-        game_init(state);
+        if (key == InputKeyOk || key == InputKeyBack) {
+            game_init(state);
+        }
         return;
     }
 }

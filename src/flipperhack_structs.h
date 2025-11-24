@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "flipperhack_menu.h"
 
 #define MAP_WIDTH 100
 #define MAP_HEIGHT 100
@@ -96,8 +97,8 @@ typedef struct {
     GameMode mode;
     int camera_x;
     int camera_y;
-    int menu_selection;
-    int selected_item_index; // For inventory
+    
+    Menu menu;
 
     short int dungeon_level; // Dungeon level
     unsigned int turn_counter; // Turn counter
