@@ -6,9 +6,9 @@
 #include <storage/storage.h>
 
 static const char* const g_rom_files[] = {
-    ROM_PATH "enemies.dat",
-    ROM_PATH "items.dat",
-    ROM_PATH "tiles.dat"
+    ROM_PATH "enemies.rom",
+    ROM_PATH "items.rom",
+    ROM_PATH "tiles.rom"
 };
 
 
@@ -16,17 +16,18 @@ static Storage* g_storage;
 static File* g_roms[3] = {NULL};
 
 bool rom_open_files() {
-    File* file = storage_file_alloc(g_storage);
-    if (!file) {
-        return false;
-    }
-
     for (uint8_t i = 0; i < 3; i++) {
-        if (!storage_file_open(file, g_rom_files[i], FSAM_READ, FSOM_OPEN_EXISTING)) {
-            storage_file_free(file);
+        g_roms[i] = storage_file_alloc(g_storage);
+        if (!g_roms[i]) {
+            FURI_LOG_E("ROM", "Failed to allocate file %s", g_rom_files[i]);
             return false;
         }
-        g_roms[i] = file;
+        FURI_LOG_I("ROM", "Opening %s", g_rom_files[i]);
+        if (!storage_file_open(g_roms[i], g_rom_files[i], FSAM_READ, FSOM_OPEN_EXISTING)) {
+            storage_file_free(g_roms[i]);
+            FURI_LOG_E("ROM", "Failed to open file %s", g_rom_files[i]);
+            return false;
+        }
     }
     return true;
 }
@@ -53,7 +54,9 @@ bool rom_init() {
 }
 
 bool rom_deinit() {
+    FURI_LOG_I("ROM", "Deinit");
     if (g_storage) {
+        FURI_LOG_I("ROM", "Closing files");
         for (uint8_t i = 0; i < 3; i++) {
             if (g_roms[i]) {
                 storage_file_close(g_roms[i]);

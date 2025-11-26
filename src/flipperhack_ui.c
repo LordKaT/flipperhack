@@ -82,7 +82,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     canvas_clear(canvas);
 
     if (state->mode == GAME_MODE_TITLE) {
-        ui_draw_image(canvas, "/ext/apps_data/flipperhack/title.bin");
+        ui_draw_image(canvas, "/ext/apps_data/flipperhack/gfx/title.bin");
         return;
     }
     
@@ -178,7 +178,7 @@ void ui_render(Canvas* canvas, GameState* state) {
         menu_draw(canvas, &state->menu);
         
     } else if (state->mode == GAME_MODE_GAME_OVER) {
-        ui_draw_image(canvas, "/ext/apps_data/flipperhack/gameover.bin");
+        ui_draw_image(canvas, "/ext/apps_data/flipperhack/gfx/gameover.bin");
         return;
     }
 }

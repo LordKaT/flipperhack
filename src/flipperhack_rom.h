@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define ROM_PATH "/ext/apps_data/flipperhack/"
+#define ROM_PATH "/ext/apps_data/flipperhack/rom/"
 #define ROM_ENEMIES 0
 #define ROM_ITEMS 1
 #define ROM_TILES 2

@@ -29,6 +29,10 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
 int32_t flipperhack_app(void* p) {
     UNUSED(p);
+
+    if (!rom_init()) {
+        return -1;
+    }
     
     AppContext* app = malloc(sizeof(AppContext));
     InputEvent event;
@@ -44,11 +48,6 @@ int32_t flipperhack_app(void* p) {
     
     app->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
-
-    if (!rom_init()) {
-        FURI_LOG_E("flipperhack", "Failed to initialize ROM");
-        return -1;
-    }
 
     FURI_LOG_I("flipperhack", "Game loaded");
 
