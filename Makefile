@@ -55,7 +55,7 @@ package: build assets
 	cp "$(FAP_OUTPUT)" "$(DIST_DIR)/flipperhack.fap"
 
 	# copy manifest
-	cp "$(MANIFEST_OUTPUT)" "$(DIST_DIR)/application.fam"
+	# cp "$(MANIFEST_OUTPUT)" "$(DIST_DIR)/application.fam"
 
 	# copy asset bins and dats
 	cp $(ALL_ASSETS) $(DIST_DATA)/

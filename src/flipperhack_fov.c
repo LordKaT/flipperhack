@@ -44,14 +44,14 @@ void map_calculate_fov(GameState* state) {
     }
     
     // Player is always visible
-    state->map.tiles[state->player.x][state->player.y].visible = true;
-    state->map.tiles[state->player.x][state->player.y].explored = true;
+    state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].visible = true;
+    state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].explored = true;
     
     // Cast rays to perimeter of circle
     for (int i = 0; i < 360; i += 2) { // Step 2 degrees for speed
         float rad = i * 3.14159f / 180.0f;
-        float bx = state->player.x + cosf(rad) * FOV_RADIUS;
-        float by = state->player.y + sinf(rad) * FOV_RADIUS;
-        cast_ray(state, state->player.x, state->player.y, bx, by);
+        float bx = state->player.entity.dynamic_data.x + cosf(rad) * FOV_RADIUS;
+        float by = state->player.entity.dynamic_data.y + sinf(rad) * FOV_RADIUS;
+        cast_ray(state, state->player.entity.dynamic_data.x, state->player.entity.dynamic_data.y, bx, by);
     }
 }

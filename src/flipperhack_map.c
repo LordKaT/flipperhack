@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "flipperhack_map.h"
-#include "flipperhack_config.h"
 
 #define MIN_ROOM_SIZE 3
 #define MAX_ROOM_SIZE 8
@@ -14,8 +13,8 @@ static int random_int(int min, int max) {
 }
 
 void map_init(Map* map) {
-    for(int x = 0; x < MAP_WIDTH; x++) {
-        for(int y = 0; y < MAP_HEIGHT; y++) {
+    for (int x = 0; x < MAP_WIDTH; x++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
             map->tiles[x][y].type = TILE_EMPTY; // Treated as wall/void
             map->tiles[x][y].visible = false;
             map->tiles[x][y].explored = false;
@@ -24,8 +23,8 @@ void map_init(Map* map) {
 }
 
 static void create_room(Map* map, Rect room) {
-    for(int x = room.x + 1; x < room.x + room.w - 1; x++) {
-        for(int y = room.y + 1; y < room.y + room.h - 1; y++) {
+    for (int x = room.x + 1; x < room.x + room.w - 1; x++) {
+        for (int y = room.y + 1; y < room.y + room.h - 1; y++) {
             map->tiles[x][y].type = TILE_FLOOR;
         }
     }
@@ -33,8 +32,8 @@ static void create_room(Map* map, Rect room) {
     // Let's make explicit walls for rendering clarity if needed, 
     // but for now TILE_EMPTY is fine as "solid rock".
     // Actually, let's mark borders as TILE_WALL for visual distinction if we want.
-    for(int x = room.x; x < room.x + room.w; x++) {
-        for(int y = room.y; y < room.y + room.h; y++) {
+    for (int x = room.x; x < room.x + room.w; x++) {
+        for (int y = room.y; y < room.y + room.h; y++) {
             if (x == room.x || x == room.x + room.w - 1 || 
                 y == room.y || y == room.y + room.h - 1) {
                 if (map->tiles[x][y].type != TILE_FLOOR) {
@@ -48,21 +47,25 @@ static void create_room(Map* map, Rect room) {
 static void create_h_tunnel(Map* map, int x1, int x2, int y) {
     int start = (x1 < x2) ? x1 : x2;
     int end = (x1 < x2) ? x2 : x1;
-    for(int x = start; x <= end; x++) {
+    for (int x = start; x <= end; x++) {
         map->tiles[x][y].type = TILE_FLOOR;
         // Optional: Walls around tunnel
-        if (y > 0 && map->tiles[x][y-1].type == TILE_EMPTY) map->tiles[x][y-1].type = TILE_WALL;
-        if (y < MAP_HEIGHT-1 && map->tiles[x][y+1].type == TILE_EMPTY) map->tiles[x][y+1].type = TILE_WALL;
+        if (y > 0 && map->tiles[x][y-1].type == TILE_EMPTY)
+            map->tiles[x][y-1].type = TILE_WALL;
+        if (y < MAP_HEIGHT-1 && map->tiles[x][y+1].type == TILE_EMPTY)
+            map->tiles[x][y+1].type = TILE_WALL;
     }
 }
 
 static void create_v_tunnel(Map* map, int y1, int y2, int x) {
     int start = (y1 < y2) ? y1 : y2;
     int end = (y1 < y2) ? y2 : y1;
-    for(int y = start; y <= end; y++) {
+    for (int y = start; y <= end; y++) {
         map->tiles[x][y].type = TILE_FLOOR;
-        if (x > 0 && map->tiles[x-1][y].type == TILE_EMPTY) map->tiles[x-1][y].type = TILE_WALL;
-        if (x < MAP_WIDTH-1 && map->tiles[x+1][y].type == TILE_EMPTY) map->tiles[x+1][y].type = TILE_WALL;
+        if (x > 0 && map->tiles[x-1][y].type == TILE_EMPTY)
+            map->tiles[x-1][y].type = TILE_WALL;
+        if (x < MAP_WIDTH-1 && map->tiles[x+1][y].type == TILE_EMPTY)
+            map->tiles[x+1][y].type = TILE_WALL;
     }
 }
 
@@ -113,8 +116,8 @@ void map_place_player(Map* map, Entity* player) {
     for(int x = 0; x < MAP_WIDTH; x++) {
         for(int y = 0; y < MAP_HEIGHT; y++) {
             if (map->tiles[x][y].type == TILE_FLOOR) {
-                player->x = x;
-                player->y = y;
+                player->dynamic_data.x = x;
+                player->dynamic_data.y = y;
                 return;
             }
         }
@@ -145,19 +148,26 @@ void map_place_stairs(Map* map) {
     }
 }
 
+Enemy goblin;
+
 void map_spawn_enemies(GameState* state) {
     state->enemy_count = 0;
+    //config_load_enemy(&goblin, "/ext/apps_data/flipperhack/goblin.dat")
+    /*
     for(int i = 0; i < 10; i++) { // Spawn 10 enemies
         int x, y;
         do {
             x = random_int(1, MAP_WIDTH - 2);
             y = random_int(1, MAP_HEIGHT - 2);
         } while(state->map.tiles[x][y].type != TILE_FLOOR);
-        
-        Entity* e = &state->enemies[state->enemy_count++];
-        e->x = x;
-        e->y = y;
-        config_load_enemy(e, "/ext/apps_data/flipperhack/goblin.dat");
-        e->active = true;
+
+        EnemyData* ed = &state->enemy_data[state->enemy_count];
+        ed->parent = &goblin;
+        ed->x = x;
+        ed->y = y;
+        ed->hp = goblin.max_hp;
+        ed->active = true;
+        state->enemy_count++;
     }
+    */
 }

@@ -15,14 +15,14 @@ void menu_add_item(Menu* menu, const char* label) {
     menu->count++;
 }
 
-MenuResult menu_handle_input(Menu* menu, InputKey key, int* selected_index) {
+uint8_t menu_handle_input(Menu* menu, InputKey key, uint8_t* selected_index) {
     if (key == InputKeyBack) {
         return MENU_RESULT_CANCELED;
     }
     
     if (key == InputKeyUp) {
         menu->selection--;
-        if (menu->selection < 0) {
+        if (menu->selection >= menu->count) {
             menu->selection = menu->count - 1; // Wrap to bottom
             // Adjust scroll to show bottom
             if (menu->count > MENU_VISIBLE_LINES) {

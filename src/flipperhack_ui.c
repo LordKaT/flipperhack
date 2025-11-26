@@ -87,8 +87,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Update Camera to center on player
-    state->camera_x = state->player.x - VIEW_WIDTH / 2;
-    state->camera_y = state->player.y - VIEW_HEIGHT / 2;
+    state->camera_x = state->player.entity.dynamic_data.x - VIEW_WIDTH / 2;
+    state->camera_y = state->player.entity.dynamic_data.y - VIEW_HEIGHT / 2;
     
     // Clamp Camera
     if (state->camera_x < 0) state->camera_x = 0;
@@ -130,18 +130,18 @@ void ui_render(Canvas* canvas, GameState* state) {
     
     // Draw Enemies
     for (int i = 0; i < state->enemy_count; i++) {
-        Entity* e = &state->enemies[i];
-        if (!e->active)
+        Entity* e = &state->enemies[i].entity;
+        if (!state->enemies[i].is_active)
             continue;
         
-        if (e->x >= state->camera_x && e->x < state->camera_x + VIEW_WIDTH &&
-            e->y >= state->camera_y && e->y < state->camera_y + VIEW_HEIGHT) {
+        if (e->dynamic_data.x >= state->camera_x && e->dynamic_data.x < state->camera_x + VIEW_WIDTH &&
+            e->dynamic_data.y >= state->camera_y && e->dynamic_data.y < state->camera_y + VIEW_HEIGHT) {
             
             // Only draw if visible
-            if (!state->map.tiles[e->x][e->y].visible) continue;
+            if (!state->map.tiles[e->dynamic_data.x][e->dynamic_data.y].visible) continue;
             
-            int screen_x = (e->x - state->camera_x) * TILE_SIZE;
-            int screen_y = (e->y - state->camera_y) * TILE_SIZE + 12;
+            int screen_x = (e->dynamic_data.x - state->camera_x) * TILE_SIZE;
+            int screen_y = (e->dynamic_data.y - state->camera_y) * TILE_SIZE + 12;
             canvas_invert_color(canvas);
             canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             canvas_invert_color(canvas);
@@ -150,8 +150,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Draw Player
-    int p_screen_x = (state->player.x - state->camera_x) * TILE_SIZE;
-    int p_screen_y = (state->player.y - state->camera_y) * TILE_SIZE + 12;
+    int p_screen_x = (state->player.entity.dynamic_data.x - state->camera_x) * TILE_SIZE;
+    int p_screen_y = (state->player.entity.dynamic_data.y - state->camera_y) * TILE_SIZE + 12;
     canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2 -1, p_screen_y + TILE_SIZE/2 - 1, TILE_SIZE/2 - 1);
     //canvas_draw_str(canvas, p_screen_x, p_screen_y + TILE_SIZE, &state->player.glyph);
     
@@ -165,7 +165,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     else {
         // Draw HP
-        snprintf(buffer, sizeof(buffer), "HP: %d/%d", state->player.hp, state->player.max_hp);
+        snprintf(buffer, sizeof(buffer), "HP: %d/%d", state->player.entity.dynamic_data.hp, state->player.entity.static_data.max_hp);
     }
 
     canvas_draw_str(canvas, 0, 10, buffer);

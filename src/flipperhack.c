@@ -5,6 +5,7 @@
 #include "flipperhack_structs.h"
 #include "flipperhack_game.h"
 #include "flipperhack_ui.h"
+#include "flipperhack_rom.h"
 
 typedef struct {
     GameState* game_state;
@@ -30,11 +31,11 @@ int32_t flipperhack_app(void* p) {
     UNUSED(p);
     
     AppContext* app = malloc(sizeof(AppContext));
+    InputEvent event;
+
     app->game_state = malloc(sizeof(GameState));
     app->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    
-    //game_init(app->game_state);
     app->game_state->mode = GAME_MODE_TITLE;
     
     app->view_port = view_port_alloc();
@@ -43,10 +44,13 @@ int32_t flipperhack_app(void* p) {
     
     app->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
-    
-    InputEvent event;
 
-    FURI_LOG_E("flipperhack", "Game loaded");
+    if (!rom_init()) {
+        FURI_LOG_E("flipperhack", "Failed to initialize ROM");
+        return -1;
+    }
+
+    FURI_LOG_I("flipperhack", "Game loaded");
 
     while(1) {
         if (app->game_state->mode == GAME_MODE_QUIT) {
@@ -61,7 +65,9 @@ int32_t flipperhack_app(void* p) {
             view_port_update(app->view_port);
         }
     }
-    
+
+    rom_deinit();
+
     gui_remove_view_port(app->gui, app->view_port);
     view_port_free(app->view_port);
     furi_record_close(RECORD_GUI);
@@ -69,6 +75,6 @@ int32_t flipperhack_app(void* p) {
     furi_mutex_free(app->mutex);
     free(app->game_state);
     free(app);
-    
+
     return 0;
 }

@@ -2,77 +2,95 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "flipperhack_menu.h"
 
-#define MAP_WIDTH 50
-#define MAP_HEIGHT 50
-#define INVENTORY_CAPACITY 25
-#define MAX_ENEMIES 50
-#define MAX_ITEMS_ON_FLOOR 50
+#define MAP_WIDTH 25
+#define MAP_HEIGHT 25
+#define INVENTORY_CAPACITY 5
+#define MAX_ENEMIES 10
+#define MAX_ITEMS_ON_FLOOR 10
 #define EQUIPMENT_SLOTS 6
 
-typedef enum {
-    TILE_EMPTY, // Void/Wall for BSP
-    TILE_FLOOR,
-    TILE_WALL,
-    TILE_STAIRS_UP,
-    TILE_STAIRS_DOWN
-} TileType;
+#define GAME_MODE_TITLE 0
+#define GAME_MODE_PLAYING 1
+#define GAME_MODE_MENU 2
+#define GAME_MODE_INVENTORY 3
+#define GAME_MODE_EQUIPMENT 4
+#define GAME_MODE_ITEM_ACTION 5
+#define GAME_MODE_GAME_OVER 6
+#define GAME_MODE_QUIT 7
 
-typedef enum {
-    SLOT_HEAD,
-    SLOT_BODY,
-    SLOT_LEGS,
-    SLOT_FEET,
-    SLOT_L_HAND,
-    SLOT_R_HAND,
-    SLOT_NONE
-} EquipSlot;
+#define TILE_EMPTY 0
+#define TILE_FLOOR 1
+#define TILE_WALL 2
+#define TILE_STAIRS_UP 3
+#define TILE_STAIRS_DOWN 4
 
-typedef enum {
-    ITEM_CONSUMABLE,
-    ITEM_EQUIPMENT,
-    ITEM_NONE
-} ItemType;
+#define SLOT_HEAD 0
+#define SLOT_BODY 1
+#define SLOT_LEGS 2
+#define SLOT_FEET 3
+#define SLOT_L_HAND 4
+#define SLOT_R_HAND 5
+#define SLOT_NONE 254
 
-typedef struct {
-    char name[32];
-    ItemType type;
-    EquipSlot equip_slot;
-    int attack_bonus;
-    int defense_bonus;
-    int hp_restore;
-    bool equipped;
-} Item;
+#define ITEM_NONE 0 // ???? WHY IS IT EVEN AN ITEM IF IT DOES NOTHING
+#define ITEM_CONSUMABLE 1
+#define ITEM_EQUIPMENT 2
 
 typedef struct {
-    char name[32];
-    char glyph;
-    int x;
-    int y;
-    int level;
-    int xp;
-    int gold;
-    int hp;
-    int max_hp;
-    int attack;
-    int defense;
-    int dodge;
-    Item inventory[INVENTORY_CAPACITY];
-    int inventory_count;
-    Item equipment[EQUIPMENT_SLOTS]; // 0=Head, 1=Body, etc.
-    bool active; // For enemies
+    uint8_t inventory_id;
+    uint8_t amount;
+} Inventory; // This is just going to be used as an array to track inventory.
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+    uint8_t hp;
+} DynamicData;
+
+typedef struct {
+    uint8_t max_hp;
+    uint8_t attack;
+    uint8_t defense;
+    uint8_t dodge;
+} StaticData;
+
+typedef struct {
+    DynamicData dynamic_data;
+    StaticData static_data;
+    bool is_player;
 } Entity;
 
 typedef struct {
-    Item item;
-    int x;
-    int y;
+    Entity entity;
+    uint8_t level;
+    uint16_t xp;
+    uint16_t gold;
+    uint8_t inventory_count;
+    Inventory inventory[INVENTORY_CAPACITY];
+    uint8_t equipment[EQUIPMENT_SLOTS];
+} Player;
+
+typedef struct {
+    Entity entity;
+    uint8_t id;
+    char glyph;
+    bool is_active;
+} Enemy;
+
+typedef struct {
+    uint8_t item_id;
+    uint8_t x;
+    uint8_t y;
     bool active;
 } WorldItem;
 
 typedef struct {
-    TileType type;
+    uint8_t type;
     bool visible;
     bool explored;
 } Tile;
@@ -81,34 +99,25 @@ typedef struct {
     Tile tiles[MAP_WIDTH][MAP_HEIGHT];
 } Map;
 
-typedef enum {
-    GAME_MODE_TITLE,
-    GAME_MODE_PLAYING,
-    GAME_MODE_MENU,
-    GAME_MODE_INVENTORY,
-    GAME_MODE_EQUIPMENT,
-    GAME_MODE_ITEM_ACTION,
-    GAME_MODE_GAME_OVER,
-    GAME_MODE_QUIT
-} GameMode;
-
 typedef struct {
     Map map;
-    Entity player;
-    Entity enemies[MAX_ENEMIES];
-    int enemy_count;
+    Player player;
+
+    Enemy enemies[MAX_ENEMIES];
+    uint8_t enemy_count;
+
     WorldItem items[MAX_ITEMS_ON_FLOOR];
-    int item_count;
+    uint8_t item_count;
     
-    GameMode mode;
-    int camera_x;
-    int camera_y;
+    uint8_t mode;
+    int8_t camera_x;
+    int8_t camera_y;
     
     Menu menu;
 
-    short int dungeon_level; // Dungeon level
-    unsigned int turn_counter; // Turn counter
-    
+    char dungeon_level; // Dungeon level
+    uint8_t turn_counter; // Turn counter
+
     // Logging
-    char log_message[64];
+    char log_message[32];
 } GameState;

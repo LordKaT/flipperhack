@@ -19,15 +19,11 @@ void trim(char* s) {
 }
 
 // Parse enemy config file
-void config_parse_enemy(Entity* e, const char* key, const char* val) {
+void config_parse_enemy(Enemy* e, const char* key, const char* val) {
     if (strcmp(key, "name") == 0) {
         snprintf(e->name, sizeof(e->name), "%s", val);
     } else if (strcmp(key, "glyph") == 0) {
         e->glyph = val[0];
-    } else if (strcmp(key, "level") == 0) {
-        e->level = atoi(val);
-    } else if (strcmp(key, "hp") == 0) {
-        e->hp = atoi(val);
     } else if (strcmp(key, "max_hp") == 0) {
         e->max_hp = atoi(val);
     } else if (strcmp(key, "attack") == 0) {
@@ -40,7 +36,7 @@ void config_parse_enemy(Entity* e, const char* key, const char* val) {
 }
 
 // Load enemy config file
-void config_load_enemy(Entity* e, const char* path) {
+void config_load_enemy(Enemy* e, const char* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
