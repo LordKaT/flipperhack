@@ -79,7 +79,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     canvas_clear(canvas);
 
     if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_TITLE) {
-        ui_draw_image(canvas, "/ext/apps_data/flipperhack/gfx/title.bin");
+        ui_draw_image(canvas, GAME_GFX "title.bin");
         return;
     }
     
@@ -98,21 +98,18 @@ void ui_render(Canvas* canvas, GameState* state) {
         for (int y = 0; y < VIEW_HEIGHT; y++) {
             int map_x = state->camera_x + x;
             int map_y = state->camera_y + y;
-            
+
             if (map_x >= MAP_WIDTH || map_y >= MAP_HEIGHT)
                 continue;
-            
+
             int screen_x = x * TILE_SIZE;
             int screen_y = y * TILE_SIZE + 12; // Offset for HUD
-            
+
             Tile tile = state->map.tiles[map_x][map_y];
-            
-            if (!tile.explored) continue; // Don't draw unexplored
-            
-            // Optional: Dim non-visible tiles? 
-            // Flipper only has 1-bit color, so we can't dim. 
-            // We could use a different pattern (e.g. dotted for walls) but let's keep it simple.
-            
+
+            if (!tile.explored)
+                continue; // Don't draw unexplored
+
             if (tile.type == TILE_WALL) {
                 canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             } else if (tile.type == TILE_FLOOR) {
@@ -130,13 +127,14 @@ void ui_render(Canvas* canvas, GameState* state) {
         Enemy* e = &state->enemies[i];
         if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT)
             continue;
-        
+
         if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH &&
             dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
             
             // Only draw if visible
-            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible) continue;
-            
+            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
+                continue;
+
             int screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
             int screen_y = (dynamicdata_get_y(e->dynamic_data) - state->camera_y) * TILE_SIZE + 12;
             canvas_invert_color(canvas);
@@ -145,16 +143,15 @@ void ui_render(Canvas* canvas, GameState* state) {
             canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &state->enemies[i].glyph);
         }
     }
-    
+
     // Draw Player
     int p_screen_x = (dynamicdata_get_x(state->player.dynamic_data) - state->camera_x) * TILE_SIZE;
     int p_screen_y = (dynamicdata_get_y(state->player.dynamic_data) - state->camera_y) * TILE_SIZE + 12;
     canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2 -1, p_screen_y + TILE_SIZE/2 - 1, TILE_SIZE/2 - 1);
-    //canvas_draw_str(canvas, p_screen_x, p_screen_y + TILE_SIZE, &state->player.glyph);
-    
+
     // Draw HUD
     canvas_set_font(canvas, FontSecondary);
-    char buffer[64];
+    char buffer[32];
 
     if (strlen(state->log_message) > 0) {
         // Draw Log
@@ -166,16 +163,16 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
 
     canvas_draw_str(canvas, 0, 10, buffer);
-    
+
     // Draw Menu Overlay
     if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_MENU || 
         splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_INVENTORY || 
         splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_EQUIPMENT) {
         
         menu_draw(canvas, &state->menu);
-        
+
     } else if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_GAME_OVER) {
-        ui_draw_image(canvas, "/ext/apps_data/flipperhack/gfx/gameover.bin");
+        ui_draw_image(canvas, GAME_GFX "gameover.bin");
         return;
     }
 }

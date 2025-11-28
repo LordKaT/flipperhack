@@ -21,6 +21,10 @@
 #include "flipperhack_ui.h"
 #include "flipperhack_rom.h"
 
+#define GAME_APPS "/ext/apps_data/flipperhack/"
+#define GAME_GFX GAME_APPS "gfx/"
+#define GAME_ROMS GAME_APPS "roms/"
+
 extern void game_init(GameState* state);
 extern void game_handle_input(GameState* state, InputKey key, InputType type);
 extern void game_open_main_menu(GameState* state);
