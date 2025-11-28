@@ -1,0 +1,6 @@
+- name: Health Potion
+  glyph: '%'
+  image: potion.bin
+  type: 1
+  effect: 1
+  amount: 10

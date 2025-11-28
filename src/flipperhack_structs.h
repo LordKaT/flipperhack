@@ -41,6 +41,10 @@
 #define ITEM_CONSUMABLE 1
 #define ITEM_EQUIPMENT 2
 
+#define ITEM_EFFECT_NONE 0
+#define ITEM_EFFECT_HEAL 1
+#define ITEM_EFFECT_HARM 2
+
 typedef struct {
     uint8_t inventory_id;
     uint8_t amount;

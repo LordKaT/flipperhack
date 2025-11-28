@@ -1,0 +1,23 @@
+- name: Imp
+  glyph: i
+  level: 1
+  hp: 5
+  attack: 1
+  defense: 1
+  dodge: 1
+
+- name: Goblin
+  glyph: g
+  level: 1
+  hp: 10
+  attack: 2
+  defense: 1
+  dodge: 0
+
+- name: Skeleton
+  glyph: s
+  level: 2
+  hp: 15
+  attack: 3
+  defense: 2
+  dodge: 1
