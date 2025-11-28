@@ -1,27 +1,22 @@
 #include "flipperhack_game.h"
-#include "flipperhack_map.h"
-#include "flipperhack_fov.h"
-#include "flipperhack_item.h"
-#include <stdarg.h>
-#include <stdio.h>
-#include <furi.h>
+
 //#include <memmgr.h>
 
 // since state->log_message is a char array, we can use it as a buffer
 // this is fine because we only have one log message at a time
 // and that log message is NEVER displayed until after it's built.
-static void log_msg(GameState* state, const char* fmt, ...) {
+void log_msg(GameState* state, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vsnprintf(state->log_message, sizeof(state->log_message), fmt, args);
     va_end(args);
 }
 
-static int random_range(int min, int max) {
+int random_range(int min, int max) {
     return min + rand() % (max - min + 1);
 }
 
-static void attack(Entity* attacker, Entity* victim) {    
+void attack(Entity* attacker, Entity* victim) {    
     //char buffer[32];
     int damage = random_range(1, 4) + attacker->static_data.attack - victim->static_data.defense;
     if (damage < 0)
@@ -50,8 +45,8 @@ static void attack(Entity* attacker, Entity* victim) {
     */
 }
 
-static void game_open_main_menu(GameState* state) {
-    state->mode = GAME_MODE_MENU;
+void game_open_main_menu(GameState* state) {
+    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
     menu_init(&state->menu, "Menu");
     menu_add_item(&state->menu, "Stairs");
     menu_add_item(&state->menu, "Inventory");
@@ -61,7 +56,7 @@ static void game_open_main_menu(GameState* state) {
     menu_add_item(&state->menu, "Memory");
 }
 
-static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
+void move_entity(GameState* state, Entity* entity, int dx, int dy) {
     Entity* player = &state->player.entity;
     int new_x = entity->dynamic_data.x + dx;
     int new_y = entity->dynamic_data.y + dy;
@@ -87,7 +82,7 @@ static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
     }
     
     // Check against enemies
-    for (int i = 0; i < state->enemy_count; i++) {
+    for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
         Entity* e = &state->enemies[i].entity;
         if (e->dynamic_data.x == new_x && e->dynamic_data.y == new_y) {
             if (!entity->is_player) {
@@ -114,7 +109,7 @@ static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
 }
 
 void game_init(GameState* state) {
-    state->mode = GAME_MODE_PLAYING;
+    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
     memset(&state->menu, 0, sizeof(state->menu)); // Clear menu state
     map_generate(&state->map);
     map_place_stairs(&state->map);
@@ -136,11 +131,15 @@ void game_init(GameState* state) {
     state->player.entity.is_player = true;
     
     state->dungeon_level = 1;
+
+    FURI_LOG_I("flipperhack", "map_place_player");
     
     map_place_player(&state->map, &state->player.entity);
     
+    FURI_LOG_I("flipperhack", "map_spawn_enemies");
     map_spawn_enemies(state);
     
+    FURI_LOG_I("flipperhack", "map_calculate_fov");
     map_calculate_fov(state);
     
     log_msg(state, "Welcome to FlipperHack 0.01a!");
@@ -149,151 +148,41 @@ void game_init(GameState* state) {
 void game_handle_input(GameState* state, InputKey key, InputType type) {
     if (type != InputTypeShort && type != InputTypeLong) return;
     
-    if (state->mode == GAME_MODE_TITLE) {
-        if (key == InputKeyOk) {
-            state->mode = GAME_MODE_PLAYING;
-            game_init(state);
-        } else if (key == InputKeyBack) {
-            state->mode = GAME_MODE_QUIT;
-        }
-        return;
-    } else if (state->mode == GAME_MODE_PLAYING) {
-        int dx = 0, dy = 0;
-        bool moved = false;
+    switch (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE)) {
+        case GAME_MODE_TITLE:
+            game_mode_title(state, key);
+            FURI_LOG_I("flipperhack", "Mode: %d", splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE));
+            break;
+        case GAME_MODE_PLAYING:
+            game_mode_playing(state, key, type);
+            break;
+        case GAME_MODE_MENU:
+            game_mode_menu(state, key);
+            break;
+        case GAME_MODE_INVENTORY:
+            game_mode_inventory(state, key);
+            break;
+        case GAME_MODE_EQUIPMENT:
+            game_mode_equipment(state, key);
+            break;
+        case GAME_MODE_ITEM_ACTION:
+            game_mode_item_action(state, key);
+            break;
+        case GAME_MODE_GAME_OVER:
+            game_mode_game_over(state, key);
+            break;
+        case GAME_MODE_QUIT:
+            game_mode_quit(state, key);
+            break;
+        default:
+            break;
         
-        switch(key) {
-            case InputKeyUp:
-                dy = -1;
-                moved = true; 
-                break;
-            case InputKeyDown:
-                dy = 1;
-                moved = true; 
-                break;
-            case InputKeyLeft:
-                dx = -1;
-                moved = true; 
-                break;
-            case InputKeyRight:
-                dx = 1;
-                moved = true; 
-                break;
-            case InputKeyOk:
-                if (type == InputTypeLong) {
-                    game_open_main_menu(state);
-                    return;
-                } else if (type == InputTypeShort) {
-                    moved = true;
-                }
-                break;
-            case InputKeyBack:
-                if (type == InputTypeShort) {
-                    game_open_main_menu(state);
-                    return;
-                } else if (type == InputTypeLong) {
-                    state->mode = GAME_MODE_QUIT;
-                    return;
-                }
-                break;
-            default:
-                break;
-        }
-        
-        if (moved) {
-            move_entity(state, &state->player.entity, dx, dy);
-            map_calculate_fov(state);
-            state->turn_counter++;
-            
-            // Enemy turn
-            for (int i = 0; i < state->enemy_count; i++) {
-                Entity* e = &state->enemies[i].entity;
-                if (!state->enemies[i].is_active)
-                    continue;
+    }
+    return;
+}
 
-                // Simple AI: Move towards player if close
-                int dist_x = state->player.entity.dynamic_data.x - e->dynamic_data.x;
-                int dist_y = state->player.entity.dynamic_data.y - e->dynamic_data.y;
-                int dist_sq = dist_x*dist_x + dist_y*dist_y;
-                
-                if (dist_sq < 50) { // Aggro range
-                    int ex = 0, ey = 0;
-                    if (abs(dist_x) > abs(dist_y)) {
-                        ex = (dist_x > 0) ? 1 : -1;
-                    } else {
-                        ey = (dist_y > 0) ? 1 : -1;
-                    }
-                    move_entity(state, e, ex, ey);
-                }
-            }
-        }
-    } else if (state->mode == GAME_MODE_MENU) {
-        uint8_t selection = 0;
-        uint8_t result = menu_handle_input(&state->menu, key, &selection);
-        
-        if (result == MENU_RESULT_CANCELED) {
-            state->mode = GAME_MODE_PLAYING;
-            return;
-        } else if (result == MENU_RESULT_SELECTED) {
-            switch(selection) {
-                case 0: // Stairs
-                    if (state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].type == TILE_STAIRS_DOWN) {
-                        // Go down (Generate new map for now)
-                        map_generate(&state->map);
-                        map_place_stairs(&state->map);
-                        map_place_player(&state->map, &state->player.entity);
-                        map_spawn_enemies(state);
-                        map_calculate_fov(state);
-                        state->mode = GAME_MODE_PLAYING;
-                        state->dungeon_level++;
-                        log_msg(state, "Descended stairs. Level %d", state->dungeon_level);
-                    } else if (state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].type == TILE_STAIRS_UP) {
-                        state->mode = GAME_MODE_PLAYING;
-                        state->dungeon_level--;
-                        log_msg(state, "Ascended stairs. Level %d", state->dungeon_level);
-                    } else {
-                        state->mode = GAME_MODE_PLAYING;
-                        log_msg(state, "No stairs here.");
-                    }
-                    break;
-                case 1: // Inventory
-                    state->mode = GAME_MODE_PLAYING;
-                    log_msg(state, "Inventory not implemented yet.");
-                    /*
-                    state->mode = GAME_MODE_INVENTORY;
-                    menu_init(&state->menu, "Inventory");
-                    if (state->player.inventory_count == 0) {
-                        menu_add_item(&state->menu, "(Empty)");
-                    } else {
-                        for(int i=0; i<state->player.inventory_count; i++) {
-                            menu_add_item(&state->menu, state->player.inventory[i].name);
-                        }
-                    }
-                    */
-                    break;
-                case 2: // Equipment
-                    state->mode = GAME_MODE_EQUIPMENT;
-                    menu_init(&state->menu, "Equipment");
-                    const char* slots[] = {"Head", "Body", "Legs", "Feet", "L.Hand", "R.Hand"};
-                    for (int i = 0; i < EQUIPMENT_SLOTS; i++) {
-                        char buf[32];
-                        snprintf(buf, sizeof(buf), "%s: <EMPTY>", slots[i]);
-                        menu_add_item(&state->menu, buf);
-                    }
-                    break;
-                case 3: // New Game
-                    game_init(state);
-                    break;
-                case 4: // Quit
-                    state->mode = GAME_MODE_QUIT;
-                    return;
-                case 5: // Memory
-                    state->mode = GAME_MODE_PLAYING;
-                    log_msg(state, "Mem: %u/%u", memmgr_get_free_heap(), memmgr_get_total_heap());
-                    break;
-            }
-        }
-    } else if (state->mode == GAME_MODE_INVENTORY) {
-        /*
+/*
+    else if (state->mode == GAME_MODE_INVENTORY) {
         int selection = 0;
         uint8_t result = menu_handle_input(&state->menu, key, &selection);
         
@@ -336,9 +225,7 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                  state->camera_x = selection; 
              }
         }
-        */
     } else if (state->mode == GAME_MODE_ITEM_ACTION) {
-        /*
         uint8_t selection = 0;
         uint8_t result = menu_handle_input(&state->menu, key, &selection);
         
@@ -404,7 +291,6 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                 }
             }
         }
-        */
     } else if (state->mode == GAME_MODE_EQUIPMENT) {
         uint8_t selection = 0;
         uint8_t result = menu_handle_input(&state->menu, key, &selection);
@@ -421,3 +307,4 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         return;
     }
 }
+*/

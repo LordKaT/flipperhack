@@ -11,9 +11,16 @@
 #define MENU_RESULT_SELECTED 1
 #define MENU_RESULT_CANCELED 2
 
+#define MENU_ITEM_STAIRS 0
+#define MENU_ITEM_INVENTORY 1
+#define MENU_ITEM_EQUIPMENT 2
+#define MENU_ITEM_NEW_GAME 3
+#define MENU_ITEM_QUIT 4
+#define MENU_ITEM_MEMORY 5
+
 typedef struct {
     char title[16];
-    char items[MENU_MAX_ITEMS][8];
+    char items[MENU_MAX_ITEMS][16];
     uint8_t count;
     uint8_t selection;
     uint8_t scroll_offset;

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <storage/storage.h>
 #include "flipperhack_ui.h"
+#include "flipperhack_splitbyte.h"
 
 #define SCREEN_PIXELS (128 * 64)
 #define SCREEN_W 128
@@ -81,7 +82,7 @@ void ui_render(Canvas* canvas, GameState* state) {
 
     canvas_clear(canvas);
 
-    if (state->mode == GAME_MODE_TITLE) {
+    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_TITLE) {
         ui_draw_image(canvas, "/ext/apps_data/flipperhack/gfx/title.bin");
         return;
     }
@@ -129,7 +130,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Draw Enemies
-    for (int i = 0; i < state->enemy_count; i++) {
+    for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
         Entity* e = &state->enemies[i].entity;
         if (!state->enemies[i].is_active)
             continue;
@@ -171,13 +172,13 @@ void ui_render(Canvas* canvas, GameState* state) {
     canvas_draw_str(canvas, 0, 10, buffer);
     
     // Draw Menu Overlay
-    if (state->mode == GAME_MODE_MENU || 
-        state->mode == GAME_MODE_INVENTORY || 
-        state->mode == GAME_MODE_EQUIPMENT) {
+    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_MENU || 
+        splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_INVENTORY || 
+        splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_EQUIPMENT) {
         
         menu_draw(canvas, &state->menu);
         
-    } else if (state->mode == GAME_MODE_GAME_OVER) {
+    } else if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_GAME_OVER) {
         ui_draw_image(canvas, "/ext/apps_data/flipperhack/gfx/gameover.bin");
         return;
     }

@@ -40,7 +40,8 @@ int32_t flipperhack_app(void* p) {
     app->game_state = malloc(sizeof(GameState));
     app->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    app->game_state->mode = GAME_MODE_TITLE;
+    app->game_state->enemy_and_mode = 0;
+    app->game_state->enemy_and_mode = splitbyte_set_low(app->game_state->enemy_and_mode, GAME_MODE_TITLE);
     
     app->view_port = view_port_alloc();
     view_port_draw_callback_set(app->view_port, draw_callback, app);
@@ -52,7 +53,7 @@ int32_t flipperhack_app(void* p) {
     FURI_LOG_I("flipperhack", "Game loaded");
 
     while(1) {
-        if (app->game_state->mode == GAME_MODE_QUIT) {
+        if (splitbyte_get(app->game_state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_QUIT) {
             break;
         }
         if (furi_message_queue_get(app->input_queue, &event, 100) == FuriStatusOk) {

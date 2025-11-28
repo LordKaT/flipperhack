@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "flipperhack_map.h"
+#include "flipperhack_game.h"
 
 #define MIN_ROOM_SIZE 3
 #define MAX_ROOM_SIZE 8
@@ -151,7 +150,7 @@ void map_place_stairs(Map* map) {
 Enemy goblin;
 
 void map_spawn_enemies(GameState* state) {
-    state->enemy_count = 0;
+    state->enemy_and_mode = splitbyte_set_high(state->enemy_and_mode, 0);
     //config_load_enemy(&goblin, "/ext/apps_data/flipperhack/goblin.dat")
     /*
     for(int i = 0; i < 10; i++) { // Spawn 10 enemies
