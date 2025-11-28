@@ -88,12 +88,15 @@ static inline uint8_t stats_get(uint32_t packed, uint8_t stat) {
     return (uint8_t)((packed >> shift) & STAT_MASK);
 }
 
-static inline bool stats_set_flag(uint32_t* packed, uint8_t flag) {
+static inline void stats_set_flag(uint32_t* packed, uint32_t flag) {
     *packed |= flag;
-    return true;
 }
 
-static inline bool stats_get_flag(uint32_t packed, uint8_t flag) {
+static inline void stats_clear_flag(uint32_t* packed, uint32_t flag) {
+    *packed &= ~flag;
+}
+
+static inline bool stats_get_flag(uint32_t packed, uint32_t flag) {
     return (packed & flag) != 0;
 }
 
@@ -123,6 +126,7 @@ typedef struct {
 
 typedef struct {
     Entity entity;
+    uint32_t stats;
     uint8_t level;
     uint16_t xp;
     uint16_t gold;

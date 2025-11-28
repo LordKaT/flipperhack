@@ -2,12 +2,19 @@
 #include "flipperhack_map.h"
 #include "flipperhack_fov.h"
 #include "flipperhack_item.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <furi.h>
 //#include <memmgr.h>
 
-static void log_msg(GameState* state, const char* msg) {
-    snprintf(state->log_message, sizeof(state->log_message), "%s", msg);
+// since state->log_message is a char array, we can use it as a buffer
+// this is fine because we only have one log message at a time
+// and that log message is NEVER displayed until after it's built.
+static void log_msg(GameState* state, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(state->log_message, sizeof(state->log_message), fmt, args);
+    va_end(args);
 }
 
 static int random_range(int min, int max) {
@@ -51,6 +58,7 @@ static void game_open_main_menu(GameState* state) {
     menu_add_item(&state->menu, "Equipment");
     menu_add_item(&state->menu, "New Game");
     menu_add_item(&state->menu, "Quit");
+    menu_add_item(&state->menu, "Memory");
 }
 
 static void move_entity(GameState* state, Entity* entity, int dx, int dy) {
@@ -116,6 +124,12 @@ void game_init(GameState* state) {
     state->player.entity.static_data.max_hp = 20;
     state->player.entity.static_data.attack = 1;
     state->player.entity.static_data.defense = 0;
+    state->player.stats = stats_pack(5, 5, 5, 5, 5, 1, true, false);
+    FURI_LOG_I("flipperhack", "Player stats: %d %d %d %d %d %d", stats_get(state->player.stats, STATS_STR), stats_get(state->player.stats, STATS_DEX), stats_get(state->player.stats, STATS_CON), stats_get(state->player.stats, STATS_INT), stats_get(state->player.stats, STATS_WIS), stats_get(state->player.stats, STATS_CHA));
+    FURI_LOG_I("flipperhack", "Player flags: %d %d", stats_get_flag(state->player.stats, STAT_FLAG1), stats_get_flag(state->player.stats, STAT_FLAG2));
+    stats_clear_flag(&state->player.stats, STAT_FLAG1);
+    stats_set_flag(&state->player.stats, STAT_FLAG2);
+    FURI_LOG_I("flipperhack", "Player flags: %d %d", stats_get_flag(state->player.stats, STAT_FLAG1), stats_get_flag(state->player.stats, STAT_FLAG2));
     state->player.level = 1;
     state->player.xp = 0;
     state->player.gold = 0;
@@ -130,10 +144,6 @@ void game_init(GameState* state) {
     map_calculate_fov(state);
     
     log_msg(state, "Welcome to FlipperHack 0.01a!");
-
-    char buffer[32];
-    snprintf(buffer, sizeof(buffer), "Mem: %u/%u", memmgr_get_free_heap(), memmgr_get_total_heap());
-    FURI_LOG_I("flipperhack", buffer);
 }
 
 void game_handle_input(GameState* state, InputKey key, InputType type) {
@@ -226,7 +236,6 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
         } else if (result == MENU_RESULT_SELECTED) {
             switch(selection) {
                 case 0: // Stairs
-                    char buffer[64];
                     if (state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].type == TILE_STAIRS_DOWN) {
                         // Go down (Generate new map for now)
                         map_generate(&state->map);
@@ -236,18 +245,14 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                         map_calculate_fov(state);
                         state->mode = GAME_MODE_PLAYING;
                         state->dungeon_level++;
-                        memset(buffer, 0, sizeof(buffer));
-                        snprintf(buffer, sizeof(buffer), "Descended stairs. Level %d", state->dungeon_level);
-                        log_msg(state, buffer);
+                        log_msg(state, "Descended stairs. Level %d", state->dungeon_level);
                     } else if (state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].type == TILE_STAIRS_UP) {
-                        memset(buffer, 0, sizeof(buffer));
-                        snprintf(buffer, sizeof(buffer), "Ascended stairs. Level %d", state->dungeon_level);
-                        log_msg(state, buffer);
                         state->mode = GAME_MODE_PLAYING;
                         state->dungeon_level--;
+                        log_msg(state, "Ascended stairs. Level %d", state->dungeon_level);
                     } else {
-                        log_msg(state, "No stairs here.");
                         state->mode = GAME_MODE_PLAYING;
+                        log_msg(state, "No stairs here.");
                     }
                     break;
                 case 1: // Inventory
@@ -269,7 +274,7 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                     state->mode = GAME_MODE_EQUIPMENT;
                     menu_init(&state->menu, "Equipment");
                     const char* slots[] = {"Head", "Body", "Legs", "Feet", "L.Hand", "R.Hand"};
-                    for(int i=0; i<6; i++) {
+                    for (int i = 0; i < EQUIPMENT_SLOTS; i++) {
                         char buf[32];
                         snprintf(buf, sizeof(buf), "%s: <EMPTY>", slots[i]);
                         menu_add_item(&state->menu, buf);
@@ -281,6 +286,10 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
                 case 4: // Quit
                     state->mode = GAME_MODE_QUIT;
                     return;
+                case 5: // Memory
+                    state->mode = GAME_MODE_PLAYING;
+                    log_msg(state, "Mem: %u/%u", memmgr_get_free_heap(), memmgr_get_total_heap());
+                    break;
             }
         }
     } else if (state->mode == GAME_MODE_INVENTORY) {
