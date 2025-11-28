@@ -1,48 +1,44 @@
 #include "flipperhack_game.h"
 
-//#include <memmgr.h>
-
-// since state->log_message is a char array, we can use it as a buffer
-// this is fine because we only have one log message at a time
-// and that log message is NEVER displayed until after it's built.
-void log_msg(GameState* state, const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(state->log_message, sizeof(state->log_message), fmt, args);
-    va_end(args);
+static inline void attack_player_on_enemy(GameState* state, Enemy *enemy) {
+    // pseudocode
+    // get player stats
+    // load enemy stats from SD card
+    // run attack(player, enemy)
+    // run post-attack checks
+    (void) state;
+    (void) enemy;
 }
 
-int random_range(int min, int max) {
-    return min + rand() % (max - min + 1);
+static inline void attack_enemy_on_player(GameState* state, Enemy *enemy) {
+    // pseudocode
+    // get enemy stats
+    // load player stats from SD card
+    // run attack(enemy, player)
+    // run post-attack checks
+    (void) state;
+    (void) enemy;
 }
 
-void attack(Entity* attacker, Entity* victim) {    
-    //char buffer[32];
-    int damage = random_range(1, 4) + attacker->static_data.attack - victim->static_data.defense;
+static inline void attack_enemy_on_enemy(GameState* state, Enemy *enemy_attacker, Enemy *enemy_victim) {
+    // pseudocode
+    // get enemy stats
+    // load enemy stats from SD card
+    // run attack(enemy, enemy)
+    // run post-attack checks
+    (void) state;
+    (void) enemy_attacker;
+    (void) enemy_victim;
+}
+
+uint8_t attack(GameState* state, uint32_t* stats_attacker, uint32_t* stats_victim) {
+    (void) state;
+    int damage = random_range(1, 4) + stats_get(*stats_attacker, STATS_STR) - stats_get(*stats_victim, STATS_DEX);
+
     if (damage < 0)
         damage = 0;
-    
-    victim->dynamic_data.hp -= damage;    
-    /*
-    if (victim == &state->player) {
-        snprintf(buffer, sizeof(buffer), "%s hits! %d dmg! (%d)", attacker->name, damage, victim->hp);
-        log_msg(state, buffer);
-    }
-    
-    if (victim->hp <= 0) {
-        victim->active = false;
-        victim->glyph = '%'; // Corpse
-        // Grant XP/Gold if attacker is player
-        if (attacker == &state->player) {
-            attacker->xp += 10;
-            snprintf(buffer, sizeof(buffer), "Killed %s! +10 XP", victim->name);
-            log_msg(state, buffer);
-        }
-        if (victim == &state->player) {
-            state->mode = GAME_MODE_GAME_OVER;
-        }
-    }
-    */
+
+    return damage;
 }
 
 void game_open_main_menu(GameState* state) {
@@ -56,19 +52,21 @@ void game_open_main_menu(GameState* state) {
     menu_add_item(&state->menu, "Memory");
 }
 
-void move_entity(GameState* state, Entity* entity, int dx, int dy) {
-    Entity* player = &state->player.entity;
-    int new_x = entity->dynamic_data.x + dx;
-    int new_y = entity->dynamic_data.y + dy;
-    
+void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
+    uint32_t* dd_player = &state->player.dynamic_data;
+
+    int new_x = dynamicdata_get_x(*dd_entity) + dx;
+    int new_y = dynamicdata_get_y(*dd_entity) + dy;
+
     // Bounds check
     if (new_x < 0 || new_x >= MAP_WIDTH || new_y < 0 || new_y >= MAP_HEIGHT) {
+        log_msg(state, "You can't leap into space.");
         return;
     }
     
     // Wall check
     if (state->map.tiles[new_x][new_y].type == TILE_WALL || state->map.tiles[new_x][new_y].type == TILE_EMPTY) {
-        if (entity->is_player) {
+        if (dynamicdata_get_state(*dd_entity) == STATE_PLAYER) {
             log_msg(state, "Blocked.");
         }
         return;
@@ -76,33 +74,35 @@ void move_entity(GameState* state, Entity* entity, int dx, int dy) {
     
     // Entity check
     // Check against player
-    if (!entity->is_player && new_x == player->dynamic_data.x && new_y == player->dynamic_data.y) {
-        attack(entity, player);
+    if (dynamicdata_get_state(*dd_entity) != STATE_PLAYER
+    && new_x == dynamicdata_get_x(*dd_player)
+    && new_y == dynamicdata_get_y(*dd_player)) {
+        attack(state, dd_entity, dd_player);
         return;
     }
     
     // Check against enemies
     for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
-        Entity* e = &state->enemies[i].entity;
-        if (e->dynamic_data.x == new_x && e->dynamic_data.y == new_y) {
-            if (!entity->is_player) {
-                attack(entity, player);
+        Enemy* e = &state->enemies[i];
+        if (dynamicdata_get_x(e->dynamic_data) == new_x && dynamicdata_get_y(e->dynamic_data) == new_y) {
+            if (dynamicdata_get_state(e->dynamic_data) != STATE_PLAYER) {
+                attack_enemy_on_player(state, e);
             } else {
-                attack(player, entity);
+                attack_player_on_enemy(state, e);
             }
             return;
         }
     }
     
     // Move
-    entity->dynamic_data.x = new_x;
-    entity->dynamic_data.y = new_y;
+    dynamicdata_set_x(dd_entity, new_x);
+    dynamicdata_set_y(dd_entity, new_y);
 
     // Heal
-    if (entity->is_player && state->turn_counter % 5 == 0) {
-        entity->dynamic_data.hp += 1;
-        if (entity->dynamic_data.hp > entity->static_data.max_hp) {
-            entity->dynamic_data.hp = entity->static_data.max_hp;
+    if (dynamicdata_get_state(*dd_entity) == STATE_PLAYER && state->turn_counter % 5 == 0) {
+        dynamicdata_set_hp(dd_entity, dynamicdata_get_hp(*dd_entity) + 1);
+        if (dynamicdata_get_hp(*dd_entity) > staticdata_get_hp_max(*dd_entity)) {
+            dynamicdata_set_hp(dd_entity, staticdata_get_hp_max(*dd_entity));
         }
         memset(state->log_message, 0, sizeof(state->log_message));
     }
@@ -111,35 +111,20 @@ void move_entity(GameState* state, Entity* entity, int dx, int dy) {
 void game_init(GameState* state) {
     state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
     memset(&state->menu, 0, sizeof(state->menu)); // Clear menu state
-    map_generate(&state->map);
-    map_place_stairs(&state->map);
+    map_generate(state);
+    map_place_stairs(state);
     
     // Init Player
-    state->player.entity.dynamic_data.hp = 20;
-    state->player.entity.static_data.max_hp = 20;
-    state->player.entity.static_data.attack = 1;
-    state->player.entity.static_data.defense = 0;
+    state->player.dynamic_data = dynamicdata_pack(20, 0, 0, 0, STATE_PLAYER, 0);
+    state->player.static_data = staticdata_pack(20, 0);
     state->player.stats = stats_pack(5, 5, 5, 5, 5, 1, true, false);
-    FURI_LOG_I("flipperhack", "Player stats: %d %d %d %d %d %d", stats_get(state->player.stats, STATS_STR), stats_get(state->player.stats, STATS_DEX), stats_get(state->player.stats, STATS_CON), stats_get(state->player.stats, STATS_INT), stats_get(state->player.stats, STATS_WIS), stats_get(state->player.stats, STATS_CHA));
-    FURI_LOG_I("flipperhack", "Player flags: %d %d", stats_get_flag(state->player.stats, STAT_FLAG1), stats_get_flag(state->player.stats, STAT_FLAG2));
-    stats_clear_flag(&state->player.stats, STAT_FLAG1);
-    stats_set_flag(&state->player.stats, STAT_FLAG2);
-    FURI_LOG_I("flipperhack", "Player flags: %d %d", stats_get_flag(state->player.stats, STAT_FLAG1), stats_get_flag(state->player.stats, STAT_FLAG2));
     state->player.level = 1;
     state->player.xp = 0;
     state->player.gold = 0;
-    state->player.entity.is_player = true;
-    
     state->dungeon_level = 1;
-
-    FURI_LOG_I("flipperhack", "map_place_player");
     
-    map_place_player(&state->map, &state->player.entity);
-    
-    FURI_LOG_I("flipperhack", "map_spawn_enemies");
+    map_place_player(state);
     map_spawn_enemies(state);
-    
-    FURI_LOG_I("flipperhack", "map_calculate_fov");
     map_calculate_fov(state);
     
     log_msg(state, "Welcome to FlipperHack 0.01a!");
@@ -151,7 +136,6 @@ void game_handle_input(GameState* state, InputKey key, InputType type) {
     switch (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE)) {
         case GAME_MODE_TITLE:
             game_mode_title(state, key);
-            FURI_LOG_I("flipperhack", "Mode: %d", splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE));
             break;
         case GAME_MODE_PLAYING:
             game_mode_playing(state, key, type);

@@ -1,5 +1,4 @@
-#include "flipperhack_fov.h"
-#include <math.h>
+#include "flipperhack_game.h"
 
 #define FOV_RADIUS 8
 
@@ -44,14 +43,14 @@ void map_calculate_fov(GameState* state) {
     }
     
     // Player is always visible
-    state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].visible = true;
-    state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].explored = true;
+    state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].visible = true;
+    state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].explored = true;
     
     // Cast rays to perimeter of circle
     for (int i = 0; i < 360; i += 2) { // Step 2 degrees for speed
         float rad = i * 3.14159f / 180.0f;
-        float bx = state->player.entity.dynamic_data.x + cosf(rad) * FOV_RADIUS;
-        float by = state->player.entity.dynamic_data.y + sinf(rad) * FOV_RADIUS;
-        cast_ray(state, state->player.entity.dynamic_data.x, state->player.entity.dynamic_data.y, bx, by);
+        float bx = dynamicdata_get_x(state->player.dynamic_data) + cosf(rad) * FOV_RADIUS;
+        float by = dynamicdata_get_y(state->player.dynamic_data) + sinf(rad) * FOV_RADIUS;
+        cast_ray(state, dynamicdata_get_x(state->player.dynamic_data), dynamicdata_get_y(state->player.dynamic_data), bx, by);
     }
 }

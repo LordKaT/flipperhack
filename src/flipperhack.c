@@ -1,11 +1,4 @@
-#include <furi.h>
-#include <gui/gui.h>
-#include <input/input.h>
-#include <storage/storage.h>
-#include "flipperhack_structs.h"
 #include "flipperhack_game.h"
-#include "flipperhack_ui.h"
-#include "flipperhack_rom.h"
 
 typedef struct {
     GameState* game_state;

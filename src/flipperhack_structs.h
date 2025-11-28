@@ -65,27 +65,14 @@ typedef struct {
 // without xp:          47 bits
 // without xp, gold:    31 bits
 
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-    uint8_t hp;
-} DynamicData;
+#define STATE_PLAYER    0
+#define STATE_IDLE      1
+#define STATE_HUNT      2
+#define STATE_FLEE      3
 
 typedef struct {
-    uint8_t max_hp;
-    uint8_t attack;
-    uint8_t defense;
-    uint8_t dodge;
-} StaticData;
-
-typedef struct {
-    DynamicData dynamic_data;
-    StaticData static_data;
-    bool is_player;
-} Entity;
-
-typedef struct {
-    Entity entity;
+    uint32_t dynamic_data;
+    uint16_t static_data;
     uint32_t stats;
     uint8_t level;
     uint16_t xp;
@@ -96,10 +83,10 @@ typedef struct {
 } Player;
 
 typedef struct {
-    Entity entity;
+    uint32_t dynamic_data;
+    uint16_t static_data;
     uint8_t id;
     char glyph;
-    bool is_active;
 } Enemy;
 
 typedef struct {

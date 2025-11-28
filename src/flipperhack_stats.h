@@ -57,4 +57,3 @@ static inline void stats_clear_flag(uint32_t* packed, uint32_t flag) {
 static inline bool stats_get_flag(uint32_t packed, uint32_t flag) {
     return (packed & flag) != 0;
 }
-

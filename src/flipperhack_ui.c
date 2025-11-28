@@ -1,8 +1,4 @@
-#include <furi.h>
-#include <stdio.h>
-#include <storage/storage.h>
-#include "flipperhack_ui.h"
-#include "flipperhack_splitbyte.h"
+#include "flipperhack_game.h"
 
 #define SCREEN_PIXELS (128 * 64)
 #define SCREEN_W 128
@@ -88,8 +84,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Update Camera to center on player
-    state->camera_x = state->player.entity.dynamic_data.x - VIEW_WIDTH / 2;
-    state->camera_y = state->player.entity.dynamic_data.y - VIEW_HEIGHT / 2;
+    state->camera_x = dynamicdata_get_x(state->player.dynamic_data) - VIEW_WIDTH / 2;
+    state->camera_y = dynamicdata_get_y(state->player.dynamic_data) - VIEW_HEIGHT / 2;
     
     // Clamp Camera
     if (state->camera_x < 0) state->camera_x = 0;
@@ -131,18 +127,18 @@ void ui_render(Canvas* canvas, GameState* state) {
     
     // Draw Enemies
     for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
-        Entity* e = &state->enemies[i].entity;
-        if (!state->enemies[i].is_active)
+        Enemy* e = &state->enemies[i];
+        if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT)
             continue;
         
-        if (e->dynamic_data.x >= state->camera_x && e->dynamic_data.x < state->camera_x + VIEW_WIDTH &&
-            e->dynamic_data.y >= state->camera_y && e->dynamic_data.y < state->camera_y + VIEW_HEIGHT) {
+        if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH &&
+            dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
             
             // Only draw if visible
-            if (!state->map.tiles[e->dynamic_data.x][e->dynamic_data.y].visible) continue;
+            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible) continue;
             
-            int screen_x = (e->dynamic_data.x - state->camera_x) * TILE_SIZE;
-            int screen_y = (e->dynamic_data.y - state->camera_y) * TILE_SIZE + 12;
+            int screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
+            int screen_y = (dynamicdata_get_y(e->dynamic_data) - state->camera_y) * TILE_SIZE + 12;
             canvas_invert_color(canvas);
             canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             canvas_invert_color(canvas);
@@ -151,8 +147,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Draw Player
-    int p_screen_x = (state->player.entity.dynamic_data.x - state->camera_x) * TILE_SIZE;
-    int p_screen_y = (state->player.entity.dynamic_data.y - state->camera_y) * TILE_SIZE + 12;
+    int p_screen_x = (dynamicdata_get_x(state->player.dynamic_data) - state->camera_x) * TILE_SIZE;
+    int p_screen_y = (dynamicdata_get_y(state->player.dynamic_data) - state->camera_y) * TILE_SIZE + 12;
     canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2 -1, p_screen_y + TILE_SIZE/2 - 1, TILE_SIZE/2 - 1);
     //canvas_draw_str(canvas, p_screen_x, p_screen_y + TILE_SIZE, &state->player.glyph);
     
@@ -166,7 +162,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     else {
         // Draw HP
-        snprintf(buffer, sizeof(buffer), "HP: %d/%d", state->player.entity.dynamic_data.hp, state->player.entity.static_data.max_hp);
+        snprintf(buffer, sizeof(buffer), "HP: %d/%d", dynamicdata_get_hp(state->player.dynamic_data), staticdata_get_hp_max(state->player.static_data));
     }
 
     canvas_draw_str(canvas, 0, 10, buffer);

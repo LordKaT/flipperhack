@@ -53,20 +53,20 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
     }
     
     if (moved) {
-        move_entity(state, &state->player.entity, dx, dy);
+        move_entity(state, &state->player.dynamic_data, dx, dy);
         map_calculate_fov(state);
         state->turn_counter++;
                 
         // Enemy turn
         for (int i = 0; i < splitbyte_get_high(state->enemy_and_mode); i++) {
-            Entity* e = &state->enemies[i].entity;
-            if (!state->enemies[i].is_active)
+            Enemy* e = &state->enemies[i];
+            if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT)
                 continue;
 
             // Simple AI: Move towards player if close
-            int dist_x = state->player.entity.dynamic_data.x - e->dynamic_data.x;
-            int dist_y = state->player.entity.dynamic_data.y - e->dynamic_data.y;
-            int dist_sq = dist_x*dist_x + dist_y*dist_y;
+            int dist_x = dynamicdata_get_x(state->player.dynamic_data) - dynamicdata_get_x(e->dynamic_data);
+            int dist_y = dynamicdata_get_y(state->player.dynamic_data) - dynamicdata_get_y(e->dynamic_data);
+            int dist_sq = dist_x * dist_x + dist_y * dist_y;
                     
             if (dist_sq < 50) { // Aggro range
                 int ex = 0, ey = 0;
@@ -75,7 +75,7 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
                 } else {
                     ey = (dist_y > 0) ? 1 : -1;
                 }
-                move_entity(state, e, ex, ey);
+                move_entity(state, &e->dynamic_data, ex, ey);
             }
         }
     }
@@ -91,17 +91,17 @@ void game_mode_menu(GameState* state, InputKey key) {
         case MENU_RESULT_SELECTED:
             switch(selection) {
                 case MENU_ITEM_STAIRS:
-                    if (state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].type == TILE_STAIRS_DOWN) {
+                    if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_DOWN) {
                         // Go down (Generate new map for now)
-                        map_generate(&state->map);
-                        map_place_stairs(&state->map);
-                        map_place_player(&state->map, &state->player.entity);
+                        map_generate(state);
+                        map_place_stairs(state);
+                        map_place_player(state);
                         map_spawn_enemies(state);
                         map_calculate_fov(state);
                         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                         state->dungeon_level++;
                         log_msg(state, "Descended stairs. Level %d", state->dungeon_level);
-                    } else if (state->map.tiles[state->player.entity.dynamic_data.x][state->player.entity.dynamic_data.y].type == TILE_STAIRS_UP) {
+                    } else if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_UP) {
                         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                         state->dungeon_level--;
                         log_msg(state, "Ascended stairs. Level %d", state->dungeon_level);

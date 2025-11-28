@@ -3,16 +3,16 @@
 #include "flipperhack_structs.h"
 
 // Initializes the map with walls
-void map_init(Map* map);
+void map_init(GameState* state);
 
 // Generates the dungeon using BSP
-void map_generate(Map* map);
+void map_generate(GameState* state);
 
 // Places the player at a valid starting location
-void map_place_player(Map* map, Entity* player);
+void map_place_player(GameState* state);
 
 // Places stairs
-void map_place_stairs(Map* map);
+void map_place_stairs(GameState* state);
 
 // Spawns enemies
 void map_spawn_enemies(GameState* state);
