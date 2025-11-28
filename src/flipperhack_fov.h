@@ -1,5 +1,5 @@
 #pragma once
 
-#include "flipperhack_structs.h"
+#include "flipperhack_game.h"
 
 void map_calculate_fov(GameState* state);

@@ -1,13 +1,11 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "flipperhack_game.h"
 
 #define ROM_PATH "/ext/apps_data/flipperhack/rom/"
 #define ROM_ENEMIES 0
-#define ROM_ITEMS 1
-#define ROM_TILES 2
-
+#define ROM_ITEMS   1
+#define ROM_TILES   2
 
 extern bool rom_init();
 extern bool rom_deinit();

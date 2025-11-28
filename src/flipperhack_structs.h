@@ -1,12 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "flipperhack_menu.h"
-#include "flipperhack_stats.h"
+#include "flipperhack_game.h"
 
 #define MAP_WIDTH 25
 #define MAP_HEIGHT 25

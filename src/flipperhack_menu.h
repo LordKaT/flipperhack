@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
-#include <gui/canvas.h>
-#include <input/input.h>
+#include "flipperhack_game.h"
 
 #define MENU_MAX_ITEMS 16
 #define MENU_VISIBLE_LINES 5

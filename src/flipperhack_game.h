@@ -4,16 +4,18 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <furi.h>
+#include <furi_hal.h>
+#include <furi_hal_sd.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <storage/storage.h>
 
+#include "flipperhack_menu.h"
 #include "flipperhack_structs.h"
 #include "flipperhack_stats.h"
 #include "flipperhack_splitbyte.h"
 #include "flipperhack_dynamicdata.h"
 #include "flipperhack_staticdata.h"
-#include "flipperhack_menu.h"
 #include "flipperhack_map.h"
 #include "flipperhack_fov.h"
 #include "flipperhack_item.h"

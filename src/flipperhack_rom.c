@@ -1,9 +1,4 @@
-#include "flipperhack_rom.h"
-
-#include <furi.h>
-#include <furi_hal.h>
-#include <furi_hal_sd.h>
-#include <storage/storage.h>
+#include "flipperhack_game.h"
 
 static const char* const g_rom_files[] = {
     ROM_PATH "enemies.rom",
@@ -77,4 +72,3 @@ bool rom_read(uint8_t file_id, uint16_t record_id, void* out, uint16_t size) {
     storage_file_read(g_roms[file_id], out, size);
     return true;
 }
-

@@ -15,9 +15,12 @@ with open("dist/enemies.rom", "wb") as rom, open("dist/enemies.nametable", "wb")
         buf[0] = ord(enemy["glyph"])
         buf[1] = enemy["level"]
         buf[2] = enemy["hp"]
-        buf[3] = enemy["attack"]
-        buf[4] = enemy["defense"]
-        buf[5] = enemy["dodge"]
+        buf[3] = enemy["str"]
+        buf[4] = enemy["dex"]
+        buf[5] = enemy["con"]
+        buf[6] = enemy["intl"]
+        buf[7] = enemy["wis"]
+        buf[8] = enemy["cha"]
 
         rom.write(buf)
 

@@ -54,6 +54,7 @@ void game_open_main_menu(GameState* state) {
 
 void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
     uint32_t* dd_player = &state->player.dynamic_data;
+    uint16_t* sd_player = &state->player.static_data;
 
     int new_x = dynamicdata_get_x(*dd_entity) + dx;
     int new_y = dynamicdata_get_y(*dd_entity) + dy;
@@ -63,7 +64,7 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
         log_msg(state, "You can't leap into space.");
         return;
     }
-    
+
     // Wall check
     if (state->map.tiles[new_x][new_y].type == TILE_WALL || state->map.tiles[new_x][new_y].type == TILE_EMPTY) {
         if (dynamicdata_get_state(*dd_entity) == STATE_PLAYER) {
@@ -71,7 +72,7 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
         }
         return;
     }
-    
+
     // Entity check
     // Check against player
     if (dynamicdata_get_state(*dd_entity) != STATE_PLAYER
@@ -80,7 +81,7 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
         attack(state, dd_entity, dd_player);
         return;
     }
-    
+
     // Check against enemies
     for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
         Enemy* e = &state->enemies[i];
@@ -93,17 +94,15 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
             return;
         }
     }
-    
+
     // Move
     dynamicdata_set_x(dd_entity, new_x);
     dynamicdata_set_y(dd_entity, new_y);
 
     // Heal
-    if (dynamicdata_get_state(*dd_entity) == STATE_PLAYER && state->turn_counter % 5 == 0) {
-        dynamicdata_set_hp(dd_entity, dynamicdata_get_hp(*dd_entity) + 1);
-        if (dynamicdata_get_hp(*dd_entity) > staticdata_get_hp_max(*dd_entity)) {
-            dynamicdata_set_hp(dd_entity, staticdata_get_hp_max(*dd_entity));
-        }
+    if (dynamicdata_get_state(*dd_player) == STATE_PLAYER && state->turn_counter % 5 == 0) {
+        if (dynamicdata_get_hp(*dd_player) < staticdata_get_hp_max(*sd_player))
+            dynamicdata_set_hp(dd_player, dynamicdata_get_hp(*dd_player) + 1);
         memset(state->log_message, 0, sizeof(state->log_message));
     }
 }
