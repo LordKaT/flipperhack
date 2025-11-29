@@ -125,8 +125,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     // Draw Enemies
     for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
         Enemy* e = &state->enemies[i];
-        if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT)
-            continue;
+        //if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT)
+        //    continue;
 
         if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH &&
             dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
@@ -140,7 +140,9 @@ void ui_render(Canvas* canvas, GameState* state) {
             canvas_invert_color(canvas);
             canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             canvas_invert_color(canvas);
-            canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &state->enemies[i].glyph);
+            char glyph;
+            rom_read_enemy(state->enemies[i].id, NULL, NULL, NULL, &glyph);
+            canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &glyph);
         }
     }
 

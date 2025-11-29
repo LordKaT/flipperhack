@@ -106,6 +106,7 @@ bool rom_read(uint8_t file_id, uint16_t record_id, void* out, uint16_t size) {
 
 bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, uint32_t* stats, char* glyph) {
     uint8_t buf[32];
+
     if (!rom_read(ROM_ENEMIES, id, buf, 32)) {
         return false;
     }
@@ -117,13 +118,6 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
     // buf[1] = level (unused in return currently, but read from ROM)
     uint8_t hp = buf[2];
     uint8_t sp = buf[3];
-
-    // buf[4] = str
-    // buf[5] = dex
-    // buf[6] = con
-    // buf[7] = intl
-    // buf[8] = wis
-    // buf[9] = cha
 
     if (stats) {
         *stats = stats_pack(

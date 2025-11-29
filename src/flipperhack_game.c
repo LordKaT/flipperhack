@@ -78,6 +78,7 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
     if (dynamicdata_get_state(*dd_entity) != STATE_PLAYER
     && new_x == dynamicdata_get_x(*dd_player)
     && new_y == dynamicdata_get_y(*dd_player)) {
+        log_msg(state, "Attack.");
         attack(state, dd_entity, dd_player);
         return;
     }
@@ -91,6 +92,7 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
             } else {
                 attack_player_on_enemy(state, e);
             }
+            log_msg(state, "Attacked.");
             return;
         }
     }

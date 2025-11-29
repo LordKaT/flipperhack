@@ -27,10 +27,7 @@ static void create_room(GameState* state, Rect room) {
             state->map.tiles[x][y].type = TILE_FLOOR;
         }
     }
-    // Walls are implicit around the floor in TILE_EMPTY or explicit TILE_WALL
-    // Let's make explicit walls for rendering clarity if needed, 
-    // but for now TILE_EMPTY is fine as "solid rock".
-    // Actually, let's mark borders as TILE_WALL for visual distinction if we want.
+
     for (int x = room.x; x < room.x + room.w; x++) {
         for (int y = room.y; y < room.y + room.h; y++) {
             if (x == room.x || x == room.x + room.w - 1 || 
@@ -151,6 +148,19 @@ void map_place_stairs(GameState* state) {
 
 void map_spawn_enemies(GameState* state) {
     state->enemy_and_mode = splitbyte_set_high(state->enemy_and_mode, 0);
+    for (int i = 0; i < 20; i++) { // let's push the FZ
+        int x, y;
+        do {
+            x = random_int(1, MAP_WIDTH - 2);
+            y = random_int(1, MAP_HEIGHT - 2);
+        } while(state->map.tiles[x][y].type != TILE_FLOOR);
+        Enemy* e = &state->enemies[splitbyte_get_high(state->enemy_and_mode)];
+        e->id = 0; // Goblin, figure this out later.
+        rom_read_enemy(e->id, &e->dynamic_data, NULL, NULL, NULL);
+        dynamicdata_set_x(&e->dynamic_data, x);
+        dynamicdata_set_y(&e->dynamic_data, y);
+        state->enemy_and_mode = splitbyte_set_high(state->enemy_and_mode, splitbyte_get_high(state->enemy_and_mode) + 1);
+    }
     //config_load_enemy(&goblin, "/ext/apps_data/flipperhack/goblin.dat")
     /*
     for(int i = 0; i < 10; i++) { // Spawn 10 enemies

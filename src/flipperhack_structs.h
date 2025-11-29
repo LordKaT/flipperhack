@@ -7,7 +7,7 @@
 #define MAP_WIDTH 25
 #define MAP_HEIGHT 25
 #define INVENTORY_CAPACITY 5
-#define MAX_ENEMIES 10
+#define MAX_ENEMIES 20
 #define MAX_ITEMS_ON_FLOOR 10
 #define EQUIPMENT_SLOTS 6
 
@@ -79,10 +79,8 @@ typedef struct {
 } Player;
 
 typedef struct {
-    uint32_t dynamic_data;
-    uint16_t static_data;
     uint8_t id;
-    char glyph;
+    uint32_t dynamic_data;
 } Enemy;
 
 typedef struct {
