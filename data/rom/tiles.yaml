@@ -1,0 +1,5 @@
+- name: Wall
+  glyph: "#"
+
+- name: Floor
+  glyph: "."

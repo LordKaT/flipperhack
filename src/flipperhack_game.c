@@ -127,9 +127,7 @@ void game_init(GameState* state) {
     map_calculate_fov(state);
     
     //log_msg(state, "Welcome to FlipperHack 0.01a!");
-    char cbuf[16];
-    rom_read_enemy_name(0, cbuf);
-    log_msg(state, "Name: %s", cbuf);
+    log_msg(state, "Name: %s", rom_read_enemy_name(0));
 }
 
 void game_handle_input(GameState* state, InputKey key, InputType type) {

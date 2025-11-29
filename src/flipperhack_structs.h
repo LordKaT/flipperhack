@@ -2,6 +2,8 @@
 
 #include "flipperhack_game.h"
 
+#define NAME_SIZE 16 // 15 + \0
+
 #define MAP_WIDTH 25
 #define MAP_HEIGHT 25
 #define INVENTORY_CAPACITY 5
@@ -40,6 +42,11 @@
 #define ITEM_EFFECT_HEAL 1
 #define ITEM_EFFECT_HARM 2
 
+#define STATE_PLAYER    0
+#define STATE_IDLE      1
+#define STATE_HUNT      2
+#define STATE_FLEE      3
+
 typedef struct {
     uint8_t inventory_id;
     uint8_t amount;
@@ -58,11 +65,6 @@ typedef struct {
 // total:               63 bits
 // without xp:          47 bits
 // without xp, gold:    31 bits
-
-#define STATE_PLAYER    0
-#define STATE_IDLE      1
-#define STATE_HUNT      2
-#define STATE_FLEE      3
 
 typedef struct {
     uint32_t dynamic_data;

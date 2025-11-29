@@ -6,20 +6,40 @@ static const char* const g_rom_files[] = {
     ROM_PATH "tiles.rom"
 };
 
+static const char* const g_nametable_files[] = {
+    ROM_PATH "enemies.nametable",
+    ROM_PATH "items.nametable",
+    ROM_PATH "tiles.nametable"
+};
+
 static Storage* g_storage;
 static File* g_roms[3] = {NULL};
+static File* g_nametables[3] = {NULL};
 
 bool rom_open_files() {
     for (uint8_t i = 0; i < 3; i++) {
         g_roms[i] = storage_file_alloc(g_storage);
+        g_nametables[i] = storage_file_alloc(g_storage);
+
         if (!g_roms[i]) {
             FURI_LOG_E("ROM", "Alloc fail: %s", g_rom_files[i]);
+            return false;
+        }
+
+        if (!g_nametables[i]) {
+            FURI_LOG_E("ROM", "Alloc fail: %s", g_nametable_files[i]);
             return false;
         }
 
         if (!storage_file_open(g_roms[i], g_rom_files[i], FSAM_READ, FSOM_OPEN_EXISTING)) {
             storage_file_free(g_roms[i]);
             FURI_LOG_E("ROM", "Open fail: %s", g_rom_files[i]);
+            return false;
+        }
+
+        if (!storage_file_open(g_nametables[i], g_nametable_files[i], FSAM_READ, FSOM_OPEN_EXISTING)) {
+            storage_file_free(g_nametables[i]);
+            FURI_LOG_E("ROM", "Open fail: %s", g_nametable_files[i]);
             return false;
         }
     }
@@ -55,6 +75,11 @@ bool rom_deinit() {
                 storage_file_free(g_roms[i]);
                 g_roms[i] = NULL;
             }
+            if (g_nametables[i]) {
+                storage_file_close(g_nametables[i]);
+                storage_file_free(g_nametables[i]);
+                g_nametables[i] = NULL;
+            }
         }
         furi_record_close(RECORD_STORAGE);
         g_storage = NULL;
@@ -86,27 +111,28 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
     }
 
     // buf[0] = glyph
-    if (glyph) *glyph = (char)buf[0];
+    if (glyph)
+        *glyph = (char)buf[0];
 
     // buf[1] = level (unused in return currently, but read from ROM)
-    // buf[2] = hp
     uint8_t hp = buf[2];
-    
-    // buf[3] = str
-    // buf[4] = dex
-    // buf[5] = con
-    // buf[6] = intl
-    // buf[7] = wis
-    // buf[8] = cha
-    
+    uint8_t sp = buf[3];
+
+    // buf[4] = str
+    // buf[5] = dex
+    // buf[6] = con
+    // buf[7] = intl
+    // buf[8] = wis
+    // buf[9] = cha
+
     if (stats) {
         *stats = stats_pack(
-            buf[3], // str
-            buf[4], // dex
-            buf[5], // con
-            buf[6], // intl
-            buf[7], // wis
-            buf[8], // cha
+            buf[4], // str
+            buf[5], // dex
+            buf[6], // con
+            buf[7], // intl
+            buf[8], // wis
+            buf[9], // cha
             false,  // flag1
             false   // flag2
         );
@@ -114,70 +140,41 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
 
     if (dynamic_data) {
         *dynamic_data = dynamicdata_pack(
-            hp,     // hp
-            0,      // sp (default 0 for now?)
-            0,      // x
-            0,      // y
-            0,      // state
-            0       // fx
+            hp,         // hp
+            sp,         // sp
+            0,          // x
+            0,          // y
+            STATE_IDLE, // state
+            0           // fx
         );
     }
 
     if (static_data) {
         *static_data = staticdata_pack(
-            hp,     // hp_max (assuming max hp = initial hp)
-            0       // sp_max
+            hp, // hp_max (hp is max_hp)
+            sp  // sp_max (sp is max_sp)
         );
     }
 
     return true;
 }
 
-bool rom_read_enemy_name(uint8_t id, char* name_out) {
-    // We don't have the nametable file open in g_roms array currently.
-    // The g_rom_files array has: enemies.rom, items.rom, tiles.rom
-    // We might need to open the nametable file separately or add it to the rom list.
-    // For now, let's assume we can open it on demand or fail if not available.
-    
-    // Wait, the user said "rom/build_roms.py we are building the "rom" files with a nametable...
-    // That is in enemies.yaml... record_id 0 should also be able to be used to retrieve the name of the enemy."
-    
-    // The current g_rom_files does NOT include the nametable.
-    // I should probably add it to g_rom_files or handle it here.
-    // Given "memory conscious", opening on demand might be better, OR adding to the kept-open list if frequent.
-    // The user said "rom files are opened: they are kept open for reading throughout the operation".
-    // So I should probably add nametables to the open files list if I want to follow that pattern.
-    
-    // However, I cannot easily change the size of g_roms array without checking everywhere it's used.
-    // It is size 3.
-    
-    // Let's look at how to implement this efficiently.
-    // For now, I will implement opening the file on demand for the name, as names might be less frequent than stats?
-    // Or I should ask the user?
-    // Actually, looking at build_roms.py, it creates "dist/enemies.nametable".
-    
-    File* file = storage_file_alloc(g_storage);
-    if (!file) return false;
-    
-    if (!storage_file_open(file, ROM_PATH "enemies.nametable", FSAM_READ, FSOM_OPEN_EXISTING)) {
-        storage_file_free(file);
-        return false;
+// the whole game consists of rubbing against enemies constantly, might as well reserve the space...
+char name_out[NAME_SIZE];
+
+char* rom_read_enemy_name(uint8_t id) {
+    uint32_t offset = (uint32_t)id * NAME_SIZE;
+
+    if (!storage_file_seek(g_nametables[ROM_ENEMIES], offset, true)) {
+        return NULL;
     }
-    
-    uint32_t offset = (uint32_t)id * 16; // NAME_SIZE is 16 in build_roms.py
-    if (!storage_file_seek(file, offset, true)) {
-        storage_file_close(file);
-        storage_file_free(file);
-        return false;
+
+    if (storage_file_read(g_nametables[ROM_ENEMIES], name_out, NAME_SIZE) != NAME_SIZE) {
+        return NULL;
     }
-    
-    if (storage_file_read(file, name_out, 16) != 16) {
-        storage_file_close(file);
-        storage_file_free(file);
-        return false;
-    }
-    
-    storage_file_close(file);
-    storage_file_free(file);
-    return true;
+
+    // sanity check
+    name_out[NAME_SIZE - 1] = '\0';
+
+    return name_out;
 }
