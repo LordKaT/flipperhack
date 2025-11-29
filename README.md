@@ -6,14 +6,8 @@ A roguelike game for the Flipper Zero.
 
 ## Build
 
-`make all` performs the following:
-
 ```bash
-make clean
-make build
-make assets
-make package
-make install
+python3 ./build.py all
 ```
 
 You should now be able to run flipperhack from the app menu.

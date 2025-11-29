@@ -1,8 +1,0 @@
-name=Goblin
-glyph=g
-level=1
-hp=10
-max_hp=10
-attack=2
-defense=0
-dodge=0

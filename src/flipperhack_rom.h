@@ -10,3 +10,5 @@
 extern bool rom_init();
 extern bool rom_deinit();
 extern bool rom_read(uint8_t file_id, uint16_t record_id, void* out, uint16_t size);
+extern bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, uint32_t* stats, char* glyph);
+extern bool rom_read_enemy_name(uint8_t id, char* name_out);

@@ -3,11 +3,11 @@ import yaml
 ENTRY_SIZE = 32
 NAME_SIZE = 16
 
-with open("enemies.yaml", "r") as f:
+with open("data/rom/enemies.yaml", "r") as f:
     enemies = yaml.safe_load(f)
     f.close()
 
-with open("dist/enemies.rom", "wb") as rom, open("dist/enemies.nametable", "wb") as nametable:
+with open("data/rom/dist/enemies.rom", "wb") as rom, open("data/rom/dist/enemies.nametable", "wb") as nametable:
 
     for enemy in enemies:
         buf = bytearray(ENTRY_SIZE)
@@ -36,11 +36,11 @@ with open("dist/enemies.rom", "wb") as rom, open("dist/enemies.nametable", "wb")
     rom.close()
     nametable.close()
 
-with open("items.yaml", "r") as f:
+with open("data/rom/items.yaml", "r") as f:
     items = yaml.safe_load(f)
     f.close()
 
-with open("dist/items.rom", "wb") as rom, open("dist/items.nametable", "wb") as nametable:
+with open("data/rom/dist/items.rom", "wb") as rom, open("data/rom/dist/items.nametable", "wb") as nametable:
 
     for item in items:
         buf = bytearray(ENTRY_SIZE)
