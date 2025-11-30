@@ -60,28 +60,42 @@ bool draw_bin_image(Canvas* canvas, Storage* storage, const char* path, int x0, 
     storage_file_free(file);
     return ok;
 }
-
-void ui_draw_image(Canvas* canvas, const char* path) {
+void ui_draw_image(Canvas* canvas, uint16_t rel_path_id) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     canvas_clear(canvas);
 
-    bool ok = draw_bin_image(canvas, storage, path, 0, 0);
+    char fullpath[96];   // more than enough for "/etc/apps_data/flipperhack/gfx/*.bin"
+    size_t di = strlen(rom_read_string(STR_GFX_DIR));
+    size_t ri = strlen(rom_read_string(rel_path_id));
+
+    // truncate safely
+    if (di + ri + 1 >= sizeof(fullpath)) {
+        canvas_draw_str(canvas, 0, 10, rom_read_string(STR_MISSING_IMAGE));
+        furi_record_close(RECORD_STORAGE);
+        return;
+    }
+
+    memset(fullpath, 0, sizeof(fullpath));
+    memcpy(fullpath, rom_read_string(STR_GFX_DIR), di);
+    memcpy(fullpath + di, rom_read_string(rel_path_id), ri + 1);   // +1 for '\0'
+
+    bool ok = draw_bin_image(canvas, storage, fullpath, 0, 0);
 
     if (!ok) {
-        canvas_draw_str(canvas, 0, 10, "Missing/Bad image");
+        canvas_draw_str(canvas, 0, 10, rom_read_string(STR_MISSING_IMAGE));
     }
 
     furi_record_close(RECORD_STORAGE);
 }
-
 void ui_render(Canvas* canvas, GameState* state) {
-    if (!state) return;
+    if (!state)
+        return;
 
     canvas_clear(canvas);
 
     if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_TITLE) {
-        ui_draw_image(canvas, GAME_GFX "title.bin");
+        ui_draw_image(canvas, STR_TITLE_BIN);
         return;
     }
     
@@ -128,12 +142,12 @@ void ui_render(Canvas* canvas, GameState* state) {
     for (uint8_t i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
         Enemy* e = &state->enemies[i];
 
-        if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH &&
-        dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
+        if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH
+        && dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
 
             // Check if enemy is in player FOV
-            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
-                continue;
+            // if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
+            //     continue;
 
             // clear the tile
             uint8_t screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
@@ -142,9 +156,9 @@ void ui_render(Canvas* canvas, GameState* state) {
             canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             canvas_invert_color(canvas);
 
-            char glyph;
-            rom_read_enemy(state->enemies[i].id, NULL, NULL, NULL, &glyph);
-            canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &glyph);
+            char glyph_str[2] = {0};
+            rom_read_enemy(state->enemies[i].id, NULL, NULL, NULL, &glyph_str[0]);
+            canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, glyph_str);
         }
     }
 
@@ -163,7 +177,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     else {
         // Draw HP
-        snprintf(buffer, sizeof(buffer), "HP: %d/%d", dynamicdata_get_hp(state->player.dynamic_data), staticdata_get_hp_max(state->player.static_data));
+        snprintf(buffer, sizeof(buffer), "%s%d/%d", rom_read_string(STR_HP_LOG), dynamicdata_get_hp(state->player.dynamic_data), staticdata_get_hp_max(state->player.static_data));
     }
 
     canvas_draw_str(canvas, 0, 10, buffer);
@@ -176,7 +190,7 @@ void ui_render(Canvas* canvas, GameState* state) {
         menu_draw(canvas, &state->menu);
 
     } else if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_GAME_OVER) {
-        ui_draw_image(canvas, GAME_GFX "gameover.bin");
+        ui_draw_image(canvas, STR_GAMEOVER_BIN);
         return;
     }
 }

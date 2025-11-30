@@ -20,7 +20,7 @@ void map_init(GameState* state) {
         }
     }
 }
-
+/*
 static void create_room(GameState* state, Rect room) {
     for (int x = room.x + 1; x < room.x + room.w - 1; x++) {
         for (int y = room.y + 1; y < room.y + room.h - 1; y++) {
@@ -66,6 +66,7 @@ static void create_v_tunnel(GameState* state, int y1, int y2, int x) {
 }
 
 // Recursive BSP
+
 static void split_node(GameState* state, Rect rect, int depth) {
     if (depth == 0 || rect.w < MIN_ROOM_SIZE * 2 || rect.h < MIN_ROOM_SIZE * 2) {
         Rect room;
@@ -100,11 +101,28 @@ static void split_node(GameState* state, Rect rect, int depth) {
         create_h_tunnel(state, rect.x + split/2, rect.x + split + (rect.w-split)/2, center_y);
     }
 }
-
+*/
 void map_generate(GameState* state) {
     map_init(state);
-    Rect root = {1, 1, MAP_WIDTH - 2, MAP_HEIGHT - 2};
-    split_node(state, root, 4); // Depth 4 = 16 regions
+    
+    // Fill the map with floor, leaving walls on top, bottom, and left.
+    // Right side (x = MAP_WIDTH - 1) is left as floor for OOB testing.
+    for (int x = 1; x < MAP_WIDTH; x++) {
+        for (int y = 1; y < MAP_HEIGHT - 1; y++) {
+            state->map.tiles[x][y].type = TILE_FLOOR;
+        }
+    }
+
+    // Explicitly set walls (optional as map_init sets TILE_EMPTY which acts as wall)
+    // But let's be sure for visual clarity if we were debugging visually
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        state->map.tiles[0][y].type = TILE_WALL; // Left wall
+        state->map.tiles[MAP_WIDTH-1][y].type = TILE_FLOOR; // Right side OPEN
+    }
+    for (int x = 0; x < MAP_WIDTH; x++) {
+        state->map.tiles[x][0].type = TILE_WALL; // Top wall
+        state->map.tiles[x][MAP_HEIGHT-1].type = TILE_WALL; // Bottom wall
+    }
 }
 
 void map_place_player(GameState* state) {
@@ -148,8 +166,8 @@ void map_place_stairs(GameState* state) {
 
 void map_spawn_enemies(GameState* state) {
     state->enemy_and_mode = splitbyte_set_high(state->enemy_and_mode, 0);
-    for (int i = 0; i < 20; i++) { // up to 20 enemies
-        int x, y;
+    for (uint8_t i = 0; i < MAX_ENEMIES; i++) {
+        uint8_t x, y;
         do {
             x = random_int(1, MAP_WIDTH - 2);
             y = random_int(1, MAP_HEIGHT - 2);
@@ -159,7 +177,7 @@ void map_spawn_enemies(GameState* state) {
             continue;
         }
         bool is_on_enemy = false;
-        for (int j = 0; j < splitbyte_get_high(state->enemy_and_mode); j++) {
+        for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
             if (x == dynamicdata_get_x(state->enemies[j].dynamic_data) && y == dynamicdata_get_y(state->enemies[j].dynamic_data)) {
                 is_on_enemy = true;
                 break;
@@ -170,7 +188,7 @@ void map_spawn_enemies(GameState* state) {
             continue;
         }
 
-        Enemy* e = &state->enemies[splitbyte_get_high(state->enemy_and_mode)];
+        Enemy* e = &state->enemies[i];
         e->id = 0; // Goblin, figure this out later.
         rom_read_enemy(e->id, &e->dynamic_data, NULL, NULL, NULL);
         dynamicdata_set_x(&e->dynamic_data, x);

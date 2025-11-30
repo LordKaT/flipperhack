@@ -1,6 +1,6 @@
 #include "flipperhack_game.h"
 
-static inline void attack_player_on_enemy(GameState* state, Enemy *enemy) {
+void attack_player_on_enemy(GameState* state, Enemy *enemy) {
     // pseudocode
     // get player stats
     // load enemy stats from SD card
@@ -10,7 +10,7 @@ static inline void attack_player_on_enemy(GameState* state, Enemy *enemy) {
     (void) enemy;
 }
 
-static inline void attack_enemy_on_player(GameState* state, Enemy *enemy) {
+void attack_enemy_on_player(GameState* state, Enemy *enemy) {
     // pseudocode
     // get enemy stats
     // load player stats from SD card
@@ -20,7 +20,7 @@ static inline void attack_enemy_on_player(GameState* state, Enemy *enemy) {
     (void) enemy;
 }
 
-static inline void attack_enemy_on_enemy(GameState* state, Enemy *enemy_attacker, Enemy *enemy_victim) {
+void attack_enemy_on_enemy(GameState* state, Enemy *enemy_attacker, Enemy *enemy_victim) {
     // pseudocode
     // get enemy stats
     // load enemy stats from SD card
@@ -50,9 +50,10 @@ void game_open_main_menu(GameState* state) {
     menu_add_item(&state->menu, "New Game");
     menu_add_item(&state->menu, "Quit");
     menu_add_item(&state->menu, "Memory");
+    menu_add_item(&state->menu, "Enemies");
 }
 
-void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
+uint8_t move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
     uint32_t entity_data = *dd_entity;
     uint8_t entity_state = dynamicdata_get_state(entity_data);
     bool is_player = (entity_state == STATE_PLAYER);
@@ -63,43 +64,50 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
     // Bounds check
     if (new_x < 0 || new_x >= MAP_WIDTH || new_y < 0 || new_y >= MAP_HEIGHT) {
         if (is_player)
-            log_msg(state, "You can't leap into space.");
-        return;
+            log_msg(state, rom_read_string(STR_CANT_JUMP));
+        return MOVE_BLOCKED;
     }
 
     // Tile block check
     Tile* tile = &state->map.tiles[new_x][new_y];
     if (tile->type == TILE_WALL || tile->type == TILE_EMPTY) {
         if (is_player)
-            log_msg(state, "Blocked.");
-        return;
+            log_msg(state, rom_read_string(STR_PATH_BLOCKED));
+        return MOVE_BLOCKED;
     }
 
     // Entity collision check
-    uint8_t enemy_count = splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY);
+    
+    // Check if moving entity hits the Player (only if moving entity is NOT the player)
+    if (!is_player) {
+         if (dynamicdata_get_x(state->player.dynamic_data) == new_x && 
+             dynamicdata_get_y(state->player.dynamic_data) == new_y) {
+             return MOVE_ATTACK_PLAYER;
+         }
+    }
 
-    for (int i = 0; i < enemy_count; i++) {
+    // Check against all enemies
+    for (int i = 0; i < MAX_ENEMIES; i++) {
         Enemy* e = &state->enemies[i];
-        uint32_t ed = e->dynamic_data;
 
-        if (dynamicdata_get_x(ed) == new_x && dynamicdata_get_y(ed) == new_y) {
+        if (dynamicdata_get_hp(e->dynamic_data) == 0)
+            continue;
 
-            // Player facehugs enemy
-            if (is_player && dynamicdata_get_state(ed) != STATE_PLAYER) {
-                attack_player_on_enemy(state, e);
-                return; 
+        uint32_t* ed = &e->dynamic_data;
+        
+        // Skip self if we are an enemy
+        if (dd_entity == ed)
+            continue;
+
+        if (dynamicdata_get_x(*ed) == new_x && dynamicdata_get_y(*ed) == new_y) {
+            // Player hits Enemy
+            if (is_player) {
+                return MOVE_ATTACK_ENEMY;
             }
 
-            // Enemy facehugs player
-            if (!is_player && dynamicdata_get_state(ed) == STATE_PLAYER) {
-                attack_enemy_on_player(state, e);
-                return;
-            }
-
-            // Enemy facehugs enemy (later use)
-            if (!is_player && dynamicdata_get_state(ed) != STATE_PLAYER) {
-                attack_enemy_on_enemy(state, NULL, e);
-                return;
+            // Enemy hits Enemy
+            if (!is_player) {
+                return MOVE_ATTACK_ENEMY;
             }
         }
     }
@@ -107,23 +115,5 @@ void move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
     // Move entity (no blocks, no combat)
     dynamicdata_set_x(dd_entity, new_x);
     dynamicdata_set_y(dd_entity, new_y);
-
-    // Post-move effects
-    if (is_player) {
-        state->turn_counter++;
-
-        if (state->turn_counter % 5 == 0) {
-            uint32_t* dd_player = &state->player.dynamic_data;
-            uint16_t* sd_player = &state->player.static_data;
-
-            uint8_t hp = dynamicdata_get_hp(*dd_player);
-            uint8_t max_hp = staticdata_get_hp_max(*sd_player);
-
-            if (hp < max_hp) {
-                dynamicdata_set_hp(dd_player, hp + 1);
-            }
-
-            memset(state->log_message, 0, sizeof(state->log_message));
-        }
-    }
+    return MOVE_OK;
 }

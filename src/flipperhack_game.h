@@ -28,8 +28,16 @@
 #define GAME_GFX GAME_APPS "gfx/"
 #define GAME_ROMS GAME_APPS "roms/"
 
+#define MOVE_OK 0
+#define MOVE_BLOCKED 1
+#define MOVE_ATTACK_PLAYER 2
+#define MOVE_ATTACK_ENEMY 3
+
 extern void game_open_main_menu(GameState* state);
-extern void move_entity(GameState* state, uint32_t* dynamic_data, int dx, int dy);
+extern uint8_t move_entity(GameState* state, uint32_t* dynamic_data, int dx, int dy);
+extern void attack_player_on_enemy(GameState* state, Enemy *enemy);
+extern void attack_enemy_on_player(GameState* state, Enemy *enemy);
+extern void attack_enemy_on_enemy(GameState* state, Enemy *enemy_attacker, Enemy *enemy_victim);
 
 // since state->log_message is a char array, we can use it as a buffer
 // this is fine because we only have one log message at a time

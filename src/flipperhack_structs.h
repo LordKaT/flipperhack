@@ -4,11 +4,11 @@
 
 #define NAME_SIZE 16 // 15 + \0
 
-#define MAP_WIDTH 25
-#define MAP_HEIGHT 25
+#define MAP_WIDTH 30
+#define MAP_HEIGHT 30
 #define INVENTORY_CAPACITY 5
-#define MAX_ENEMIES 20
-#define MAX_ITEMS_ON_FLOOR 10
+#define MAX_ENEMIES 15
+#define MAX_ITEMS_ON_FLOOR 30
 #define EQUIPMENT_SLOTS 6
 
 #define GAME_MODE_TITLE 0

@@ -22,8 +22,10 @@ entries = [
     ("STR_RECORD_STORAGE_FAIL","RECORD_STORAGE fail!"),
     ("STR_ROM_FAIL",           "ROM Fail!"),
     ("STR_MISSING_IMAGE",      "Missing/Bad image!"),
+    ("STR_GFX_DIR",            "/ext/apps_data/flipperhack/gfx/"),
     ("STR_TITLE_BIN",          "title.bin"),
     ("STR_GAMEOVER_BIN",       "gameover.bin"),
+    ("STR_HP_LOG",             "HP: "),
     ("STR_NULL",               ""),
 ]
 

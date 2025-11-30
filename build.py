@@ -145,8 +145,8 @@ def task_build(_args):
         sys.exit(1)
 
 def task_package(args):
-    task_build(args)
     task_assets(args)
+    task_build(args)
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     DIST_DATA_DIR.mkdir(parents=True, exist_ok=True)

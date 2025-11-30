@@ -15,6 +15,7 @@
 #define MENU_ITEM_NEW_GAME 3
 #define MENU_ITEM_QUIT 4
 #define MENU_ITEM_MEMORY 5
+#define MENU_ITEM_ENEMIES 6
 
 typedef struct {
     char title[16];
