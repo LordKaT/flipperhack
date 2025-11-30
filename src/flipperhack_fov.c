@@ -2,7 +2,7 @@
 
 #define FOV_RADIUS 8
 
-static inline void cast_ray(GameState* state, uint32_t* dynamic_data, float ax, float ay, float bx, float by, void (*callback)(GameState*, uint32_t*, uint8_t, uint8_t)) {
+static inline void cast_ray(GameState* state, float ax, float ay, float bx, float by) {
     float dx = bx - ax;
     float dy = by - ay;
     float dist = sqrtf(dx*dx + dy*dy);
@@ -23,22 +23,16 @@ static inline void cast_ray(GameState* state, uint32_t* dynamic_data, float ax, 
         if (map_x < 0 || map_x >= MAP_WIDTH || map_y < 0 || map_y >= MAP_HEIGHT)
             return;
         
-        callback(state, dynamic_data, map_x, map_y);
-        
-        if (state->map.tiles[map_x][map_y].type == TILE_WALL || 
-            state->map.tiles[map_x][map_y].type == TILE_EMPTY) {
+        state->map.tiles[map_x][map_y].visible = true;
+        state->map.tiles[map_x][map_y].explored = true;
+
+        if (state->map.tiles[map_x][map_y].type == TILE_WALL || state->map.tiles[map_x][map_y].type == TILE_EMPTY) {
             return; // Blocked
         }
         
         cur_x += step_x;
         cur_y += step_y;
     }
-}
-
-static inline void player_cast_ray_callback(GameState* state, uint32_t* dynamic_data, uint8_t map_x, uint8_t map_y) {
-    (void)dynamic_data;
-    state->map.tiles[map_x][map_y].visible = true;
-    state->map.tiles[map_x][map_y].explored = true;
 }
 
 void player_calculate_fov(GameState* state) {
@@ -58,6 +52,6 @@ void player_calculate_fov(GameState* state) {
         float rad = i * 3.14159f / 180.0f;
         float bx = dynamicdata_get_x(state->player.dynamic_data) + cosf(rad) * FOV_RADIUS;
         float by = dynamicdata_get_y(state->player.dynamic_data) + sinf(rad) * FOV_RADIUS;
-        cast_ray(state, &state->player.dynamic_data, dynamicdata_get_x(state->player.dynamic_data), dynamicdata_get_y(state->player.dynamic_data), bx, by, player_cast_ray_callback);
+        cast_ray(state, dynamicdata_get_x(state->player.dynamic_data), dynamicdata_get_y(state->player.dynamic_data), bx, by);
     }
 }

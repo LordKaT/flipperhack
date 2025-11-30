@@ -134,6 +134,8 @@ void ui_render(Canvas* canvas, GameState* state) {
                 canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "<");
             } else if (tile.type == TILE_STAIRS_DOWN) {
                 canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, ">");
+            } else if (tile.type == TILE_EMPTY) {
+                canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "X");
             }
         }
     }

@@ -102,6 +102,82 @@ static void split_node(GameState* state, Rect rect, int depth) {
     }
 }
 */
+
+static inline uint16_t drunken_walk_count(GameState* state) {
+    uint16_t count = 0;
+    for (uint8_t x = 0; x < MAP_WIDTH; x++) {
+        for (uint8_t y = 0; y < MAP_HEIGHT; y++) {
+            if (state->map.tiles[x][y].type == TILE_FLOOR)
+                count++;
+        }
+    }
+    return count;
+}
+
+static void map_drunken_walk(GameState* state, uint8_t start_x, uint8_t start_y, uint16_t target_count) {
+    uint16_t floors = 0;
+    uint8_t x = start_x;
+    uint8_t y = start_y;
+
+    while (floors < target_count) {
+
+        if (state->map.tiles[x][y].type != TILE_FLOOR) {
+            state->map.tiles[x][y].type = TILE_FLOOR;
+            floors++;
+        }
+
+        uint8_t dir = random_int(0, 3);
+        switch(dir) {
+            case 0:
+                if (x < MAP_WIDTH - 1)
+                    x++;
+                break;
+            case 1:
+                if (x > 0)
+                    x--;
+                break;
+            case 2:
+                if (y < MAP_HEIGHT - 1)
+                    y++;
+                break;
+            case 3:
+                if (y > 0)
+                    y--;
+                break;
+        }
+        for (int8_t ox = -1; ox <= 1; ox++) {
+            for (int8_t oy = -1; oy <= 1; oy++) {
+                int8_t nx = x + ox;
+                int8_t ny = y + oy;
+                if (nx <= 0 || ny <= 0 || nx >= MAP_WIDTH - 1 || ny >= MAP_HEIGHT - 1)
+                    continue;
+                if (state->map.tiles[nx][ny].type == TILE_EMPTY)
+                    state->map.tiles[nx][ny].type = TILE_WALL;
+            }
+        }
+    }
+}
+
+void map_generate(GameState* state) {
+    map_init(state);
+
+    uint16_t target = (MAP_WIDTH * MAP_HEIGHT) * 20 / 100;
+    uint8_t x = MAP_WIDTH / 2;
+    uint8_t y = MAP_HEIGHT / 2;
+    map_drunken_walk(state, x, y, target);
+
+    for (uint8_t i = 0; i < MAP_WIDTH; i++) {
+        state->map.tiles[i][0].type = TILE_WALL;
+        state->map.tiles[i][MAP_HEIGHT - 1].type = TILE_WALL;
+    }
+    for (uint8_t i = 0; i < MAP_HEIGHT; i++) {
+        state->map.tiles[0][i].type = TILE_WALL;
+        state->map.tiles[MAP_WIDTH - 1][i].type = TILE_WALL;
+    }
+}
+
+/*
+// empty room
 void map_generate(GameState* state) {
     map_init(state);
     
@@ -124,6 +200,7 @@ void map_generate(GameState* state) {
         state->map.tiles[x][MAP_HEIGHT-1].type = TILE_WALL; // Bottom wall
     }
 }
+*/
 
 void map_place_player(GameState* state) {
     // Find first floor tile
@@ -140,23 +217,15 @@ void map_place_player(GameState* state) {
 }
 
 void map_place_stairs(GameState* state) {
-    (void) state;
     int placed = 0;
+
     // Place Up Stairs
-    while(placed < 1) {
-        int x = random_int(1, MAP_WIDTH - 2);
-        int y = random_int(1, MAP_HEIGHT - 2);
-        if (state->map.tiles[x][y].type == TILE_FLOOR) {
-            state->map.tiles[x][y].type = TILE_STAIRS_UP;
-            placed++;
-        }
-    }
-    
-    placed = 0;
+    state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type = TILE_STAIRS_UP;
+
     // Place Down Stairs
-    while(placed < 1) {
-        int x = random_int(1, MAP_WIDTH - 2);
-        int y = random_int(1, MAP_HEIGHT - 2);
+    while (placed < 1) {
+        uint8_t x = random_int(1, MAP_WIDTH - 2);
+        uint8_t y = random_int(1, MAP_HEIGHT - 2);
         if (state->map.tiles[x][y].type == TILE_FLOOR) {
             state->map.tiles[x][y].type = TILE_STAIRS_DOWN;
             placed++;

@@ -2,9 +2,9 @@
 
 static inline void game_init_state(GameState *state) {
     map_generate(state);
-    map_place_stairs(state);
     map_place_player(state);
-    map_spawn_enemies(state);
+    map_place_stairs(state);
+    //map_spawn_enemies(state);
     player_calculate_fov(state);
 }
 
