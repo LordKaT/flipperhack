@@ -89,13 +89,13 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
              int target_y = dynamicdata_get_y(state->player.dynamic_data) + dy;
              
              for (int i = 0; i < MAX_ENEMIES; i++) {
-                 Enemy* e = &state->enemies[i];
-                 if (dynamicdata_get_hp(e->dynamic_data) > 0 &&
-                     dynamicdata_get_x(e->dynamic_data) == target_x &&
-                     dynamicdata_get_y(e->dynamic_data) == target_y) {
-                     attack_player_on_enemy(state, e);
-                     break;
-                 }
+                Enemy* e = &state->enemies[i];
+                if (dynamicdata_get_hp(e->dynamic_data) > 0
+                && dynamicdata_get_x(e->dynamic_data) == target_x
+                && dynamicdata_get_y(e->dynamic_data) == target_y) {
+                    attack_player_on_enemy(state, e);
+                    break;
+                }
              }
         }
 
@@ -132,20 +132,20 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
                 if (result == MOVE_ATTACK_PLAYER) {
                     attack_enemy_on_player(state, e);
                 } else if (result == MOVE_ATTACK_ENEMY) {
-                     // Enemy bumped into another enemy
-                     uint8_t target_x = dynamicdata_get_x(e->dynamic_data) + dx;
-                     uint8_t target_y = dynamicdata_get_y(e->dynamic_data) + dy;
-                     
-                     for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
-                         Enemy* victim = &state->enemies[j];
-                         if (dynamicdata_get_hp(victim->dynamic_data) > 0
-                         && dynamicdata_get_x(victim->dynamic_data) == target_x
-                         && dynamicdata_get_y(victim->dynamic_data) == target_y
-                         && victim != e) {
+                    // Enemy bumped into another enemy
+                    uint8_t target_x = dynamicdata_get_x(e->dynamic_data) + dx;
+                    uint8_t target_y = dynamicdata_get_y(e->dynamic_data) + dy;
+                    
+                    for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
+                        Enemy* victim = &state->enemies[j];
+                        if (dynamicdata_get_hp(victim->dynamic_data) > 0
+                        && dynamicdata_get_x(victim->dynamic_data) == target_x
+                        && dynamicdata_get_y(victim->dynamic_data) == target_y
+                        && victim != e) {
                             attack_enemy_on_enemy(state, e, victim);
                             break;
-                         }
-                     }
+                        }
+                    }
                 }
                 continue;
             }
@@ -169,20 +169,20 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
             if (result == MOVE_ATTACK_PLAYER) {
                 attack_enemy_on_player(state, e);
             } else if (result == MOVE_ATTACK_ENEMY) {
-                 // Enemy bumped into another enemy
-                 uint8_t target_x = dynamicdata_get_x(e->dynamic_data) + dx;
-                 uint8_t target_y = dynamicdata_get_y(e->dynamic_data) + dy;
-                 
-                 for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
-                     Enemy* victim = &state->enemies[j];
-                     if (dynamicdata_get_hp(victim->dynamic_data) > 0 &&
-                         dynamicdata_get_x(victim->dynamic_data) == target_x &&
-                         dynamicdata_get_y(victim->dynamic_data) == target_y &&
-                         victim != e) {
-                         attack_enemy_on_enemy(state, e, victim);
-                         break;
-                     }
-                 }
+                // Enemy bumped into another enemy
+                uint8_t target_x = dynamicdata_get_x(e->dynamic_data) + dx;
+                uint8_t target_y = dynamicdata_get_y(e->dynamic_data) + dy;
+                
+                for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
+                    Enemy* victim = &state->enemies[j];
+                    if (dynamicdata_get_hp(victim->dynamic_data) > 0
+                    && dynamicdata_get_x(victim->dynamic_data) == target_x
+                    && dynamicdata_get_y(victim->dynamic_data) == target_y
+                    && victim != e) {
+                        attack_enemy_on_enemy(state, e, victim);
+                        break;
+                    }
+                }
             }   
         }
     }
