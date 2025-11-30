@@ -94,16 +94,16 @@ void ui_render(Canvas* canvas, GameState* state) {
     if (state->camera_y > MAP_HEIGHT - VIEW_HEIGHT) state->camera_y = MAP_HEIGHT - VIEW_HEIGHT;
 
     // Draw Map
-    for (int x = 0; x < VIEW_WIDTH; x++) {
-        for (int y = 0; y < VIEW_HEIGHT; y++) {
-            int map_x = state->camera_x + x;
-            int map_y = state->camera_y + y;
+    for (uint8_t x = 0; x < VIEW_WIDTH; x++) {
+        for (uint8_t y = 0; y < VIEW_HEIGHT; y++) {
+            uint8_t map_x = state->camera_x + x;
+            uint8_t map_y = state->camera_y + y;
 
             if (map_x >= MAP_WIDTH || map_y >= MAP_HEIGHT)
                 continue;
 
-            int screen_x = x * TILE_SIZE;
-            int screen_y = y * TILE_SIZE + 12; // Offset for HUD
+            uint8_t screen_x = x * TILE_SIZE;
+            uint8_t screen_y = y * TILE_SIZE + 12; // Offset for HUD
 
             Tile tile = state->map.tiles[map_x][map_y];
 
@@ -123,23 +123,18 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
     
     // Draw Enemies
-    for (int i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
+    for (uint8_t i = 0; i < splitbyte_get(state->enemy_and_mode, SPLITBYTE_ENEMY); i++) {
         Enemy* e = &state->enemies[i];
-        //if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT)
-        //    continue;
 
         if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH &&
             dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
             
-            // Only draw if visible
-            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
-                continue;
-
-            int screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
-            int screen_y = (dynamicdata_get_y(e->dynamic_data) - state->camera_y) * TILE_SIZE + 12;
+            uint8_t screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
+            uint8_t screen_y = (dynamicdata_get_y(e->dynamic_data) - state->camera_y) * TILE_SIZE + 12;
             canvas_invert_color(canvas);
             canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
             canvas_invert_color(canvas);
+
             char glyph;
             rom_read_enemy(state->enemies[i].id, NULL, NULL, NULL, &glyph);
             canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE - 1, &glyph);
@@ -147,8 +142,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
 
     // Draw Player
-    int p_screen_x = (dynamicdata_get_x(state->player.dynamic_data) - state->camera_x) * TILE_SIZE;
-    int p_screen_y = (dynamicdata_get_y(state->player.dynamic_data) - state->camera_y) * TILE_SIZE + 12;
+    uint8_t p_screen_x = (dynamicdata_get_x(state->player.dynamic_data) - state->camera_x) * TILE_SIZE;
+    uint8_t p_screen_y = (dynamicdata_get_y(state->player.dynamic_data) - state->camera_y) * TILE_SIZE + 12;
     canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2 -1, p_screen_y + TILE_SIZE/2 - 1, TILE_SIZE/2 - 1);
 
     // Draw HUD

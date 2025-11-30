@@ -148,12 +148,28 @@ void map_place_stairs(GameState* state) {
 
 void map_spawn_enemies(GameState* state) {
     state->enemy_and_mode = splitbyte_set_high(state->enemy_and_mode, 0);
-    for (int i = 0; i < 20; i++) { // let's push the FZ
+    for (int i = 0; i < 20; i++) { // up to 20 enemies
         int x, y;
         do {
             x = random_int(1, MAP_WIDTH - 2);
             y = random_int(1, MAP_HEIGHT - 2);
         } while(state->map.tiles[x][y].type != TILE_FLOOR);
+        if (x == dynamicdata_get_x(state->player.dynamic_data) && y == dynamicdata_get_y(state->player.dynamic_data)) {
+            // don't spawn on player
+            continue;
+        }
+        bool is_on_enemy = false;
+        for (int j = 0; j < splitbyte_get_high(state->enemy_and_mode); j++) {
+            if (x == dynamicdata_get_x(state->enemies[j].dynamic_data) && y == dynamicdata_get_y(state->enemies[j].dynamic_data)) {
+                is_on_enemy = true;
+                break;
+            }
+        }
+        if (is_on_enemy) {
+            // don't spawn on another enemy
+            continue;
+        }
+
         Enemy* e = &state->enemies[splitbyte_get_high(state->enemy_and_mode)];
         e->id = 0; // Goblin, figure this out later.
         rom_read_enemy(e->id, &e->dynamic_data, NULL, NULL, NULL);
@@ -161,22 +177,4 @@ void map_spawn_enemies(GameState* state) {
         dynamicdata_set_y(&e->dynamic_data, y);
         state->enemy_and_mode = splitbyte_set_high(state->enemy_and_mode, splitbyte_get_high(state->enemy_and_mode) + 1);
     }
-    //config_load_enemy(&goblin, "/ext/apps_data/flipperhack/goblin.dat")
-    /*
-    for(int i = 0; i < 10; i++) { // Spawn 10 enemies
-        int x, y;
-        do {
-            x = random_int(1, MAP_WIDTH - 2);
-            y = random_int(1, MAP_HEIGHT - 2);
-        } while(state->map.tiles[x][y].type != TILE_FLOOR);
-
-        EnemyData* ed = &state->enemy_data[state->enemy_count];
-        ed->parent = &goblin;
-        ed->x = x;
-        ed->y = y;
-        ed->hp = goblin.max_hp;
-        ed->active = true;
-        state->enemy_count++;
-    }
-    */
 }
