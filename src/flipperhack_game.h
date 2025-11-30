@@ -10,6 +10,7 @@
 #include <input/input.h>
 #include <storage/storage.h>
 
+#include "flipperhack_defs.h"
 #include "flipperhack_menu.h"
 #include "flipperhack_structs.h"
 #include "flipperhack_stats.h"
@@ -24,14 +25,6 @@
 #include "flipperhack_rom.h"
 #include "flipperhack_strings.h"
 
-#define GAME_APPS "/ext/apps_data/flipperhack/"
-#define GAME_GFX GAME_APPS "gfx/"
-#define GAME_ROMS GAME_APPS "roms/"
-
-#define MOVE_OK 0
-#define MOVE_BLOCKED 1
-#define MOVE_ATTACK_PLAYER 2
-#define MOVE_ATTACK_ENEMY 3
 
 extern void game_open_main_menu(GameState* state);
 extern uint8_t move_entity(GameState* state, uint32_t* dynamic_data, int dx, int dy);

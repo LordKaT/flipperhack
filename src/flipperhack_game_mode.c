@@ -6,7 +6,6 @@ static inline void game_init_state(GameState *state) {
     map_place_player(state);
     map_spawn_enemies(state);
     player_calculate_fov(state);
-    enemy_calculate_fov(state);
 }
 
 static inline void game_init(GameState* state) {

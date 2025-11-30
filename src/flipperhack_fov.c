@@ -61,33 +61,3 @@ void player_calculate_fov(GameState* state) {
         cast_ray(state, &state->player.dynamic_data, dynamicdata_get_x(state->player.dynamic_data), dynamicdata_get_y(state->player.dynamic_data), bx, by, player_cast_ray_callback);
     }
 }
-
-static inline void enemy_cast_ray_callback(GameState* state, uint32_t* dynamic_data, uint8_t map_x, uint8_t map_y) {
-    // check if player is in FOV
-    // if true:
-    // set dynamicdata state to STATE_HUNT
-    (void)state;
-    bool is_hunt = false;
-    if (map_x == dynamicdata_get_x(state->player.dynamic_data) && map_y == dynamicdata_get_y(state->player.dynamic_data)) {
-        dynamicdata_set_state(dynamic_data, STATE_HUNT);
-        is_hunt = true;
-    }
-    if (!is_hunt) {
-        dynamicdata_set_state(dynamic_data, STATE_IDLE);
-    }
-    return;
-}
-
-void enemy_calculate_fov(GameState* state) {
-    for (uint8_t i = 0; i < MAX_ENEMIES; i++) {
-        if (dynamicdata_get_hp(state->enemies[i].dynamic_data) == 0)
-            continue;
-
-        for (uint16_t j = 0; j < 360; j += 1) {
-            float rad = j * 3.14159f / 180.0f;
-            float bx = dynamicdata_get_x(state->enemies[i].dynamic_data) + cosf(rad) * FOV_RADIUS;
-            float by = dynamicdata_get_y(state->enemies[i].dynamic_data) + sinf(rad) * FOV_RADIUS;
-            cast_ray(state, &state->enemies[i].dynamic_data, dynamicdata_get_x(state->enemies[i].dynamic_data), dynamicdata_get_y(state->enemies[i].dynamic_data), bx, by, enemy_cast_ray_callback);
-        }
-    }
-}
