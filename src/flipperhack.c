@@ -20,6 +20,42 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     furi_mutex_release(app->mutex);
 }
 
+static inline void handle_input(GameState* state, InputKey key, InputType type) {
+    if (type != InputTypeShort && type != InputTypeLong)
+        return;
+    
+    switch (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE)) {
+        case GAME_MODE_TITLE:
+            game_mode_title(state, key);
+            break;
+        case GAME_MODE_PLAYING:
+            game_mode_playing(state, key, type);
+            break;
+        case GAME_MODE_MENU:
+            game_mode_menu(state, key);
+            break;
+        case GAME_MODE_INVENTORY:
+            game_mode_inventory(state, key);
+            break;
+        case GAME_MODE_EQUIPMENT:
+            game_mode_equipment(state, key);
+            break;
+        case GAME_MODE_ITEM_ACTION:
+            game_mode_item_action(state, key);
+            break;
+        case GAME_MODE_GAME_OVER:
+            game_mode_game_over(state, key);
+            break;
+        case GAME_MODE_QUIT:
+            game_mode_quit(state, key);
+            break;
+        default:
+            break;
+        
+    }
+    return;
+}
+
 int32_t flipperhack_app(void* p) {
     UNUSED(p);
 
@@ -52,7 +88,7 @@ int32_t flipperhack_app(void* p) {
         if (furi_message_queue_get(app->input_queue, &event, 100) == FuriStatusOk) {
             furi_mutex_acquire(app->mutex, FuriWaitForever);
             if (event.type == InputTypeShort || event.type == InputTypeLong) {
-                game_handle_input(app->game_state, event.key, event.type);
+                handle_input(app->game_state, event.key, event.type);
             }
             furi_mutex_release(app->mutex);
             view_port_update(app->view_port);

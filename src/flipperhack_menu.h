@@ -25,6 +25,6 @@ typedef struct {
 } Menu;
 
 extern void menu_init(Menu* menu, const char* title);
-extern void menu_add_item(Menu* menu, const char* label);
+extern void menu_add_item(Menu* menu, const char* fmt, ...);
 extern uint8_t menu_handle_input(Menu* menu, InputKey key, uint8_t* selected_index);
 extern void menu_draw(Canvas* canvas, Menu* menu);

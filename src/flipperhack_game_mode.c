@@ -1,5 +1,31 @@
 #include "flipperhack_game_mode.h"
 
+static inline void game_init_state(GameState *state) {
+    map_generate(state);
+    map_place_stairs(state);
+    map_place_player(state);
+    map_spawn_enemies(state);
+    player_calculate_fov(state);
+    enemy_calculate_fov(state);
+}
+
+static inline void game_init(GameState* state) {
+    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+    memset(&state->menu, 0, sizeof(state->menu)); // Clear menu state
+    // Init Player
+    state->player.dynamic_data = dynamicdata_pack(20, 0, 0, 0, STATE_PLAYER, true                                                                               , 0);
+    state->player.static_data = staticdata_pack(20, 0);
+    state->player.stats = stats_pack(5, 5, 5, 5, 5, 1, true, false);
+    state->player.level = 1;
+    state->player.xp = 0;
+    state->player.gold = 0;
+    state->dungeon_level = 1;
+
+    game_init_state(state);
+
+    log_msg(state, rom_read_string(STR_WELCOME));
+}
+
 void game_mode_title(GameState* state, InputKey key) {
     if (key == InputKeyOk) {
         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
@@ -54,7 +80,7 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
     
     if (moved) {
         move_entity(state, &state->player.dynamic_data, dx, dy);
-        map_calculate_fov(state);
+        player_calculate_fov(state);
         state->turn_counter++;
                 
         // Enemy turn
@@ -93,25 +119,22 @@ void game_mode_menu(GameState* state, InputKey key) {
                 case MENU_ITEM_STAIRS:
                     if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_DOWN) {
                         // Go down (Generate new map for now)
-                        map_generate(state);
-                        map_place_stairs(state);
-                        map_place_player(state);
-                        map_spawn_enemies(state);
-                        map_calculate_fov(state);
+                        game_init_state(state);
                         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                         state->dungeon_level++;
-                        log_msg(state, "Descended stairs. Level %d", state->dungeon_level);
+                        log_msg(state, rom_read_string(STR_DESCEND), state->dungeon_level);
                     } else if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_UP) {
                         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                         state->dungeon_level--;
-                        log_msg(state, "Ascended stairs. Level %d", state->dungeon_level);
+                        log_msg(state, rom_read_string(STR_ASCEND), state->dungeon_level);
                     } else {
-                        log_msg(state, "No stairs here.");
+                        log_msg(state, rom_read_string(STR_NO_STAIRS));
                     }
+                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                     break;
                 case MENU_ITEM_INVENTORY:
                     state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                    log_msg(state, "Inventory not implemented yet.");
+                    log_msg(state, rom_read_string(STR_NOT_IMPLEMENTED));
                     /*
                     state->mode = GAME_MODE_INVENTORY;
                     menu_init(&state->menu, "Inventory");
@@ -129,9 +152,7 @@ void game_mode_menu(GameState* state, InputKey key) {
                     menu_init(&state->menu, "Equipment");
                     const char* slots[] = {"Head", "Body", "Legs", "Feet", "L.Hand", "R.Hand"};
                     for (int i = 0; i < EQUIPMENT_SLOTS; i++) {
-                        char buf[32];
-                        snprintf(buf, sizeof(buf), "%s: <EMPTY>", slots[i]);
-                        menu_add_item(&state->menu, buf);
+                        menu_add_item(&state->menu, "%s: <EMPTY>", slots[i]);
                     }
                     break;
                 case MENU_ITEM_NEW_GAME:
@@ -160,9 +181,17 @@ void game_mode_inventory(GameState* state, InputKey key) {
 }
 
 void game_mode_equipment(GameState* state, InputKey key) {
-    (void) state;
-    (void) key;
-    // unimplemented right now
+    uint8_t selection = 0;
+    switch (menu_handle_input(&state->menu, key, &selection)) {
+        case MENU_RESULT_CANCELED:
+            game_open_main_menu(state);
+            break;
+        case MENU_RESULT_SELECTED:
+            FURI_LOG_I("FlipperHack", "Selected: %d", selection);
+            break;
+        default:
+            break;
+    }
     return;
 }
 

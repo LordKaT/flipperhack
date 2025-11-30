@@ -30,7 +30,7 @@ bool draw_bin_image(Canvas* canvas, Storage* storage, const char* path, int x0, 
     File* file = storage_file_alloc(storage);
     bool ok = false;
 
-    if(!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if (!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         storage_file_free(file);
         return false;
     }
@@ -40,17 +40,19 @@ bool draw_bin_image(Canvas* canvas, Storage* storage, const char* path, int x0, 
 
     // Buffer for reading chunks
     uint8_t buffer[64]; 
-    while(pixel_index < SCREEN_PIXELS) {
+    while (pixel_index < SCREEN_PIXELS) {
         uint16_t read_count = storage_file_read(file, buffer, sizeof(buffer));
-        if(read_count == 0) break;
+        if (read_count == 0)
+            break;
 
-        for(uint16_t i = 0; i < read_count; i++) {
+        for (uint16_t i = 0; i < read_count; i++) {
             emit_byte_as_pixels(canvas, buffer[i], &pixel_index, x0, y0);
-            if(pixel_index >= SCREEN_PIXELS) break;
+            if (pixel_index >= SCREEN_PIXELS)
+                break;
         }
     }
 
-    if(pixel_index >= SCREEN_PIXELS) {
+    if (pixel_index >= SCREEN_PIXELS) {
         ok = true;
     }
 
@@ -66,7 +68,7 @@ void ui_draw_image(Canvas* canvas, const char* path) {
 
     bool ok = draw_bin_image(canvas, storage, path, 0, 0);
 
-    if(!ok) {
+    if (!ok) {
         canvas_draw_str(canvas, 0, 10, "Missing/Bad image");
     }
 
@@ -127,8 +129,13 @@ void ui_render(Canvas* canvas, GameState* state) {
         Enemy* e = &state->enemies[i];
 
         if (dynamicdata_get_x(e->dynamic_data) >= state->camera_x && dynamicdata_get_x(e->dynamic_data) < state->camera_x + VIEW_WIDTH &&
-            dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
-            
+        dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
+
+            // Check if enemy is in player FOV
+            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
+                continue;
+
+            // clear the tile
             uint8_t screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
             uint8_t screen_y = (dynamicdata_get_y(e->dynamic_data) - state->camera_y) * TILE_SIZE + 12;
             canvas_invert_color(canvas);

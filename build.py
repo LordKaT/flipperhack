@@ -28,6 +28,9 @@ BUILD_ASSETS = TOOLS_DIR / "build_assets.py"
 # Script that builds enemies/items ROMs + nametables (if you have it)
 BUILD_ROMS = TOOLS_DIR / "build_roms.py"
 
+# Script that builds stringtable
+BUILD_STRINGTABLE = TOOLS_DIR / "build_stringtable.py"
+
 # ufbt output
 FAP_OUTPUT = Path(os.environ.get("HOME", "")) / ".ufbt" / "build" / "flipperhack.fap"
 
@@ -36,6 +39,7 @@ DIST_DIR = ROOT / "dist"
 DIST_DATA_DIR = DIST_DIR / "data"
 DIST_GFX_DIR = DIST_DATA_DIR / "gfx"
 DIST_ROM_DIR = DIST_DATA_DIR / "rom"
+DIST_STRINGTABLE_DIR = DIST_DATA_DIR / "rom"
 
 
 # Helpers
@@ -44,18 +48,15 @@ def run(cmd, cwd=None):
     print(f"[RUN] {cmd_str}")
     subprocess.check_call(cmd, cwd=cwd)
 
-
 def needs_rebuild(src: Path, dest: Path) -> bool:
     if not dest.exists():
         return True
     return src.stat().st_mtime > dest.stat().st_mtime
 
-
 def rm_tree(path: Path):
     if path.exists():
         print(f"[CLEAN] Removing {path}")
         shutil.rmtree(path)
-
 
 def copy_tree(src: Path, dst: Path):
     if not src.exists():
@@ -68,7 +69,6 @@ def copy_tree(src: Path, dst: Path):
             dest_file = dst / rel
             dest_file.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, dest_file)
-
 
 # Asset builders
 def build_gfx_assets():
@@ -122,9 +122,19 @@ def build_rom_assets():
     print(f"[ROM] Running {BUILD_ROMS.relative_to(ROOT)}")
     run([sys.executable, str(BUILD_ROMS)], cwd=ROOT)
 
+def build_stringtable():
+    if not BUILD_STRINGTABLE.exists():
+        print("[STRINGTABLE] tools/build_stringtable.py not found, skipping stringtable generation.")
+        return
+
+    ROM_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"[STRINGTABLE] Running {BUILD_STRINGTABLE.relative_to(ROOT)}")
+    run([sys.executable, str(BUILD_STRINGTABLE)], cwd=ROOT)
+
 def task_assets(_args):
     build_gfx_assets()
     build_rom_assets()
+    build_stringtable()
     print("[ASSETS] All assets built.")
 
 def task_build(_args):
@@ -167,7 +177,7 @@ def task_install(_args):
 
 def task_clean_assets(_args):
     rm_tree(GFX_DIST_DIR)
-    rm_tree(ROM_DIST_DIR)
+    # rm_tree(ROM_DIST_DIR)
 
 def task_clean_raw(_args):
     rm_tree(GFX_RAW_DIR)

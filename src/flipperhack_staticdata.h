@@ -1,3 +1,4 @@
+// yeah it should be called "infrequentlyaccesseddata" but too long so I make small.
 #pragma once
 
 #include <stdbool.h>

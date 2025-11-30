@@ -7,9 +7,13 @@ void menu_init(Menu* menu, const char* title) {
     menu->scroll_offset = 0;
 }
 
-void menu_add_item(Menu* menu, const char* label) {
-    if (menu->count >= MENU_MAX_ITEMS) return;
-    snprintf(menu->items[menu->count], sizeof(menu->items[0]), "%s", label);
+void menu_add_item(Menu* menu, const char* fmt, ...) {
+    if (menu->count >= MENU_MAX_ITEMS)
+        return;
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(menu->items[menu->count], sizeof(menu->items[0]), fmt, args);
+    va_end(args);
     menu->count++;
 }
 

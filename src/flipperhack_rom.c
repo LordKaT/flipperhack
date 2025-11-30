@@ -12,9 +12,12 @@ static const char* const g_nametable_files[] = {
     ROM_PATH "tiles.nametable"
 };
 
+static const char* const g_string_file = ROM_PATH "strings.stringtable";
+
 static Storage* g_storage;
 static File* g_roms[3] = {NULL};
 static File* g_nametables[3] = {NULL};
+static File* g_stringtable = NULL;
 
 bool rom_open_files() {
     for (uint8_t i = 0; i < 3; i++) {
@@ -43,6 +46,19 @@ bool rom_open_files() {
             return false;
         }
     }
+
+    g_stringtable = storage_file_alloc(g_storage);
+    if (!g_stringtable) {
+        FURI_LOG_E("ROM", "Alloc fail: %s", g_string_file);
+        return false;
+    }
+
+    if (!storage_file_open(g_stringtable, g_string_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(g_stringtable);
+        FURI_LOG_E("ROM", "Open fail: %s", g_string_file);
+        return false;
+    }
+    
     return true;
 }
 
@@ -80,6 +96,11 @@ bool rom_deinit() {
                 storage_file_free(g_nametables[i]);
                 g_nametables[i] = NULL;
             }
+        }
+        if (g_stringtable) {
+            storage_file_close(g_stringtable);
+            storage_file_free(g_stringtable);
+            g_stringtable = NULL;
         }
         furi_record_close(RECORD_STORAGE);
         g_storage = NULL;
@@ -139,6 +160,7 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
             0,          // x
             0,          // y
             STATE_IDLE, // state
+            false,      // in_fov
             0           // fx
         );
     }
@@ -158,6 +180,7 @@ char name_out[NAME_SIZE];
 
 char* rom_read_enemy_name(uint8_t id) {
     uint32_t offset = (uint32_t)id * NAME_SIZE;
+    memset(name_out, 0, NAME_SIZE);
 
     if (!storage_file_seek(g_nametables[ROM_ENEMIES], offset, true)) {
         return NULL;
@@ -171,4 +194,25 @@ char* rom_read_enemy_name(uint8_t id) {
     name_out[NAME_SIZE - 1] = '\0';
 
     return name_out;
+}
+
+#define STRING_SIZE 32
+char string_out[STRING_SIZE];
+
+char* rom_read_string(uint8_t id) {
+    uint32_t offset = (uint32_t)id * STRING_SIZE;
+    memset(string_out, 0, STRING_SIZE);
+
+    if (!storage_file_seek(g_stringtable, offset, true)) {
+        return NULL;
+    }
+
+    if (storage_file_read(g_stringtable, string_out, STRING_SIZE) != STRING_SIZE) {
+        return NULL;
+    }
+
+    // sanity check
+    string_out[STRING_SIZE - 1] = '\0';
+
+    return string_out;
 }
