@@ -146,8 +146,8 @@ void ui_render(Canvas* canvas, GameState* state) {
         && dynamicdata_get_y(e->dynamic_data) >= state->camera_y && dynamicdata_get_y(e->dynamic_data) < state->camera_y + VIEW_HEIGHT) {
 
             // Check if enemy is in player FOV
-            // if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
-            //     continue;
+            if (!state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible)
+                continue;
 
             // clear the tile
             uint8_t screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;

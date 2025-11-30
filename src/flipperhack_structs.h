@@ -52,20 +52,6 @@ typedef struct {
     uint8_t amount;
 } Inventory; // This is just going to be used as an array to track inventory.
 
-// map: 30x30 max      5x5 bits
-
-// hp: 254 max          8 bits
-// max_mp: 254 max      8 bits
-// level: 30 max?       5 bits
-// xp: ?? tbd           16 bits
-// gold: ?? tbd         16 bits
-// x: 30 max            5 bits
-// y: 30 max            5 bits
-
-// total:               63 bits
-// without xp:          47 bits
-// without xp, gold:    31 bits
-
 typedef struct {
     uint32_t dynamic_data;
     uint16_t static_data;
@@ -115,9 +101,8 @@ typedef struct {
     
     Menu menu;
 
-    char dungeon_level; // Dungeon level
-    uint8_t turn_counter; // Turn counter
+    char dungeon_level;
+    uint8_t turn_counter;
 
-    // Logging
     char log_message[32];
 } GameState;

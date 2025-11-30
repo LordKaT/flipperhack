@@ -124,6 +124,12 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
             if (dynamicdata_get_hp(e->dynamic_data) == 0)
                 continue;
 
+            if (state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible) {
+                dynamicdata_set_state(&e->dynamic_data, STATE_HUNT);
+            } else {
+                dynamicdata_set_state(&e->dynamic_data, STATE_IDLE);
+            }
+
             if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT) {
                 uint8_t dx = random_range(-1, 1);
                 uint8_t dy = random_range(-1, 1);
