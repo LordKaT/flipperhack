@@ -17,8 +17,8 @@ static inline void cast_ray(GameState* state, float ax, float ay, float bx, floa
     float cur_y = ay;
     
     for (uint8_t i = 0; i <= (uint8_t)dist; i++) {
-        int8_t map_x = (int8_t)(cur_x + 0.5f);
-        int8_t map_y = (int8_t)(cur_y + 0.5f);
+        int16_t map_x = (int16_t)(cur_x + 0.5f);
+        int16_t map_y = (int16_t)(cur_y + 0.5f);
         
         if (map_x < 0 || map_x >= MAP_WIDTH || map_y < 0 || map_y >= MAP_HEIGHT)
             return;

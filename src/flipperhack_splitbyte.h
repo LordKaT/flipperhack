@@ -3,10 +3,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// 5 bits for High (Enemy Count, max 31)
-// 3 bits for Low (Game Mode, max 7)
-#define SPLITBYTE_HIGH_BITS 5u
-#define SPLITBYTE_LOW_BITS 3u
+// 4 bits for High (Enemy Count, max 15)
+// 4 bits for Low (Game Mode, max 15)
+#define SPLITBYTE_HIGH_BITS 4u
+#define SPLITBYTE_LOW_BITS 4u
 
 #define SPLITBYTE_HIGH_MASK ((uint8_t)((1u << SPLITBYTE_HIGH_BITS) - 1u))
 #define SPLITBYTE_LOW_MASK ((uint8_t)((1u << SPLITBYTE_LOW_BITS) - 1u))

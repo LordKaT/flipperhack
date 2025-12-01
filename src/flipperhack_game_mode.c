@@ -14,7 +14,7 @@ static inline void game_init(GameState* state) {
     memset(state->enemies, 0, sizeof(state->enemies));
     memset(&state->menu, 0, sizeof(state->menu));
     // Init Player
-    state->player.dynamic_data = dynamicdata_pack(5, 0, 0, 0, STATE_PLAYER, 0);
+    state->player.dynamic_data = dynamicdata_pack(5, 0, 0, 0, STATE_PLAYER);
     state->player.static_data = staticdata_pack(20, 0);
     state->player.stats = stats_pack(5, 5, 5, 5, 5, 1, true, false);
     state->player.level = 1;
@@ -111,9 +111,8 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
 
             if (hp < max_hp) {
                 dynamicdata_set_hp(dd_player, hp + 1);
+                memset(state->log_message, 0, sizeof(state->log_message));
             }
-
-            memset(state->log_message, 0, sizeof(state->log_message));
         }
 
         // Enemy turn
@@ -249,13 +248,17 @@ void game_mode_menu(GameState* state, InputKey key) {
                     return;
                 case MENU_ITEM_MEMORY:
                     state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                    log_msg(state, "Mem: %u/%u", memmgr_get_free_heap(), memmgr_get_total_heap());
+                    log_msg(state, "M: %u/%u", memmgr_get_free_heap(), memmgr_get_total_heap());
                     break;
                 case MENU_ITEM_ENEMIES:
                     //state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                     for (int i = 0; i < MAX_ENEMIES; i++) {
                         FURI_LOG_I("game", "Enemy %d: %s %d,%d", i, rom_read_enemy_name(state->enemies[i].id), dynamicdata_get_x(state->enemies[i].dynamic_data), dynamicdata_get_y(state->enemies[i].dynamic_data));
                     }
+                    break;
+                case MENU_ITEM_CURSOR:
+                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_CURSOR);
+                    cursor_init(state);
                     break;
                 default:
                     break;

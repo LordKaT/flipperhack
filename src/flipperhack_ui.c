@@ -212,4 +212,17 @@ void ui_render(Canvas* canvas, GameState* state) {
         ui_draw_image(canvas, STR_GAMEOVER_BIN);
         return;
     }
+
+    // Draw Cursor
+    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CURSOR && state->cursor.active) {
+        uint8_t c_screen_x = (state->cursor.x - state->camera_x) * TILE_SIZE;
+        uint8_t c_screen_y = (state->cursor.y - state->camera_y) * TILE_SIZE + 12;
+        
+        // Ensure cursor is within view (it should be due to movement constraints, but good to be safe)
+        if (c_screen_x < SCREEN_W && c_screen_y < SCREEN_H) {
+            // Draw X
+            canvas_draw_line(canvas, c_screen_x, c_screen_y, c_screen_x + TILE_SIZE - 1, c_screen_y + TILE_SIZE - 1);
+            canvas_draw_line(canvas, c_screen_x + TILE_SIZE - 1, c_screen_y, c_screen_x, c_screen_y + TILE_SIZE - 1);
+        }
+    }
 }

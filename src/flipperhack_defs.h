@@ -2,8 +2,8 @@
 
 #define NAME_SIZE           16 // 15 + \0
 
-#define MAP_WIDTH           30
-#define MAP_HEIGHT          30
+#define MAP_WIDTH           128
+#define MAP_HEIGHT          128
 #define INVENTORY_CAPACITY  5
 #define MAX_ENEMIES         15
 #define MAX_ITEMS_ON_FLOOR  30
@@ -17,6 +17,7 @@
 #define GAME_MODE_ITEM_ACTION 5
 #define GAME_MODE_GAME_OVER   6
 #define GAME_MODE_QUIT        7
+#define GAME_MODE_CURSOR      8
 
 #define TILE_EMPTY          0
 #define TILE_FLOOR          1

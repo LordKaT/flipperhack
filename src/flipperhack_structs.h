@@ -3,6 +3,12 @@
 #include "flipperhack_game.h"
 
 typedef struct {
+    uint8_t x;
+    uint8_t y;
+    bool active;
+} Cursor;
+
+typedef struct {
     uint8_t inventory_id;
     uint8_t amount;
 } Inventory; // This is just going to be used as an array to track inventory.
@@ -60,4 +66,6 @@ typedef struct {
     uint8_t turn_counter;
 
     char log_message[32];
+
+    Cursor cursor;
 } GameState;

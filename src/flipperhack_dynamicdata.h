@@ -23,32 +23,28 @@
 
 #define DYNAMIC_HP_BITS     8u
 #define DYNAMIC_SP_BITS     8u
-#define DYNAMIC_X_BITS      6u
-#define DYNAMIC_Y_BITS      6u
+#define DYNAMIC_X_BITS      7u
+#define DYNAMIC_Y_BITS      7u
 #define DYNAMIC_STATE_BITS  2u
-#define DYNAMIC_FX_BITS     2u
 
 #define DYNAMIC_HP_MASK     ((1u << DYNAMIC_HP_BITS)     - 1u)     // 0xFF
 #define DYNAMIC_SP_MASK     ((1u << DYNAMIC_SP_BITS)     - 1u)     // 0xFF
 #define DYNAMIC_X_MASK      ((1u << DYNAMIC_X_BITS)      - 1u)     // 0x1F
 #define DYNAMIC_Y_MASK      ((1u << DYNAMIC_Y_BITS)      - 1u)     // 0x1F
 #define DYNAMIC_STATE_MASK  ((1u << DYNAMIC_STATE_BITS)  - 1u)     // 0x03
-#define DYNAMIC_FX_MASK     ((1u << DYNAMIC_FX_BITS)     - 1u)     // 0x0F
 
 #define DYNAMIC_HP_SHIFT        0u
 #define DYNAMIC_SP_SHIFT        8u
 #define DYNAMIC_X_SHIFT         16u
-#define DYNAMIC_Y_SHIFT         22u
-#define DYNAMIC_STATE_SHIFT     28u
-#define DYNAMIC_FX_SHIFT        30u
+#define DYNAMIC_Y_SHIFT         23u
+#define DYNAMIC_STATE_SHIFT     30u
 
 static inline uint32_t dynamicdata_pack(
     uint8_t hp,
     uint8_t sp,
     uint8_t x,
     uint8_t y,
-    uint8_t state,
-    uint8_t fx
+    uint8_t state
 ){
     uint32_t v = 0;
 
@@ -57,7 +53,6 @@ static inline uint32_t dynamicdata_pack(
     v |= ((uint32_t)(x     & DYNAMIC_X_MASK)     << DYNAMIC_X_SHIFT);
     v |= ((uint32_t)(y     & DYNAMIC_Y_MASK)     << DYNAMIC_Y_SHIFT);
     v |= ((uint32_t)(state & DYNAMIC_STATE_MASK) << DYNAMIC_STATE_SHIFT);
-    v |= ((uint32_t)(fx    & DYNAMIC_FX_MASK)    << DYNAMIC_FX_SHIFT);
 
     return v;
 }
@@ -74,8 +69,6 @@ static inline uint32_t dynamicdata_get(uint32_t packed, uint8_t field) {
             return (packed >> DYNAMIC_Y_SHIFT) & DYNAMIC_Y_MASK;
         case DYNAMIC_STATE:
             return (packed >> DYNAMIC_STATE_SHIFT) & DYNAMIC_STATE_MASK;
-        case DYNAMIC_FX:
-            return (packed >> DYNAMIC_FX_SHIFT) & DYNAMIC_FX_MASK;
         default:
             return 0;
     }
@@ -104,10 +97,6 @@ static inline void dynamicdata_set(uint32_t* packed, uint8_t field, uint32_t val
         case DYNAMIC_STATE:
             mask = DYNAMIC_STATE_MASK;
             shift = DYNAMIC_STATE_SHIFT;
-            break;
-        case DYNAMIC_FX:
-            mask = DYNAMIC_FX_MASK;
-            shift = DYNAMIC_FX_SHIFT;
             break;
         default:
             return;
@@ -159,15 +148,4 @@ static inline uint8_t dynamicdata_get_state(uint32_t p) {
 static inline void dynamicdata_set_state(uint32_t* p, uint8_t v) {
     *p = (*p & ~(DYNAMIC_STATE_MASK << DYNAMIC_STATE_SHIFT)) |
          ((v & DYNAMIC_STATE_MASK) << DYNAMIC_STATE_SHIFT);
-}
-
-
-
-static inline uint8_t dynamicdata_get_fx(uint32_t p) {
-    return (p >> DYNAMIC_FX_SHIFT) & DYNAMIC_FX_MASK;
-}
-
-static inline void dynamicdata_set_fx(uint32_t* p, uint8_t v) {
-    *p = (*p & ~(DYNAMIC_FX_MASK << DYNAMIC_FX_SHIFT)) |
-         ((v & DYNAMIC_FX_MASK) << DYNAMIC_FX_SHIFT);
 }

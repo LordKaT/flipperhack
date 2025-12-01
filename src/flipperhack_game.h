@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_memory.h>
 #include <furi_hal_sd.h>
 #include <gui/gui.h>
 #include <input/input.h>
@@ -24,6 +25,7 @@
 #include "flipperhack_ui.h"
 #include "flipperhack_rom.h"
 #include "flipperhack_strings.h"
+#include "flipperhack_cursor.h"
 
 
 extern void game_open_main_menu(GameState* state);

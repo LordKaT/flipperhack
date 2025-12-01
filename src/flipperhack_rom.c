@@ -159,8 +159,7 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
             sp,         // sp
             0,          // x
             0,          // y
-            STATE_IDLE, // state
-            0           // fx
+            STATE_IDLE  // state
         );
     }
 

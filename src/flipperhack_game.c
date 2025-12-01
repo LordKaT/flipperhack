@@ -51,6 +51,7 @@ void game_open_main_menu(GameState* state) {
     menu_add_item(&state->menu, "Quit");
     menu_add_item(&state->menu, "Memory");
     menu_add_item(&state->menu, "Enemies");
+    menu_add_item(&state->menu, "Cursor");
 }
 
 uint8_t move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
