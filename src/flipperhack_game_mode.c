@@ -43,18 +43,38 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
             
     switch(key) {
         case InputKeyUp:
+            if (type == InputTypeLong) {
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_DIRECTION_SELECT);
+                cursor_init(state);
+                return;
+            }
             dy = -1;
             moved = true; 
             break;
         case InputKeyDown:
+            if (type == InputTypeLong) {
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_DIRECTION_SELECT);
+                cursor_init(state);
+                return;
+            }
             dy = 1;
             moved = true; 
             break;
         case InputKeyLeft:
+            if (type == InputTypeLong) {
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_DIRECTION_SELECT);
+                cursor_init(state);
+                return;
+            }
             dx = -1;
             moved = true; 
             break;
         case InputKeyRight:
+            if (type == InputTypeLong) {
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_DIRECTION_SELECT);
+                cursor_init(state);
+                return;
+            }
             dx = 1;
             moved = true; 
             break;
@@ -309,4 +329,172 @@ void game_mode_quit(GameState* state, InputKey key) {
     (void) key;
     // unimplemented right now
     return;
+}
+
+void game_mode_direction_select(GameState* state, InputKey key) {
+    int dx = 0;
+    int dy = 0;
+    bool moved_cursor = false;
+
+    switch (key) {
+        case InputKeyUp:
+            dy = -1;
+            moved_cursor = true;
+            break;
+        case InputKeyDown:
+            dy = 1;
+            moved_cursor = true;
+            break;
+        case InputKeyLeft:
+            dx = -1;
+            moved_cursor = true;
+            break;
+        case InputKeyRight:
+            dx = 1;
+            moved_cursor = true;
+            break;
+        case InputKeyOk:
+            // Check if valid move
+            if (state->map.tiles[state->cursor.x][state->cursor.y].type != TILE_WALL &&
+                state->map.tiles[state->cursor.x][state->cursor.y].visible) {
+                
+                int move_dx = state->cursor.x - dynamicdata_get_x(state->player.dynamic_data);
+                int move_dy = state->cursor.y - dynamicdata_get_y(state->player.dynamic_data);
+
+                // Execute move
+                uint8_t move_result = move_entity(state, &state->player.dynamic_data, move_dx, move_dy);
+                
+                if (move_result == MOVE_ATTACK_ENEMY) {
+                     // Player attacking an enemy
+                     int target_x = dynamicdata_get_x(state->player.dynamic_data) + move_dx;
+                     int target_y = dynamicdata_get_y(state->player.dynamic_data) + move_dy;
+                     
+                     for (int i = 0; i < MAX_ENEMIES; i++) {
+                        Enemy* e = &state->enemies[i];
+                        if (dynamicdata_get_hp(e->dynamic_data) > 0
+                        && dynamicdata_get_x(e->dynamic_data) == target_x
+                        && dynamicdata_get_y(e->dynamic_data) == target_y) {
+                            attack_player_on_enemy(state, e);
+                            break;
+                        }
+                     }
+                }
+
+                player_calculate_fov(state);
+                state->turn_counter++;
+
+                // Post-move effects (Copy-pasted from game_mode_playing for now)
+                if (state->turn_counter % 5 == 0) {
+                    uint32_t* dd_player = &state->player.dynamic_data;
+                    uint16_t* sd_player = &state->player.static_data;
+
+                    uint8_t hp = dynamicdata_get_hp(*dd_player);
+                    uint8_t max_hp = staticdata_get_hp_max(*sd_player);
+
+                    if (hp < max_hp) {
+                        dynamicdata_set_hp(dd_player, hp + 1);
+                        memset(state->log_message, 0, sizeof(state->log_message));
+                    }
+                }
+
+                // Enemy turn (Copy-pasted from game_mode_playing for now)
+                // TODO: Refactor this into a common function
+                for (uint8_t i = 0; i < splitbyte_get_high(state->enemy_and_mode); i++) {
+                    Enemy* e = &state->enemies[i];
+
+                    if (dynamicdata_get_hp(e->dynamic_data) == 0)
+                        continue;
+
+                    if (state->map.tiles[dynamicdata_get_x(e->dynamic_data)][dynamicdata_get_y(e->dynamic_data)].visible) {
+                        dynamicdata_set_state(&e->dynamic_data, STATE_HUNT);
+                    } else {
+                        dynamicdata_set_state(&e->dynamic_data, STATE_IDLE);
+                    }
+
+                    if (dynamicdata_get_state(e->dynamic_data) != STATE_HUNT) {
+                        uint8_t edx = random_range(-1, 1);
+                        uint8_t edy = random_range(-1, 1);
+                        uint8_t result = move_entity(state, &e->dynamic_data, edx, edy);
+                        
+                        if (result == MOVE_ATTACK_PLAYER) {
+                            attack_enemy_on_player(state, e);
+                        } else if (result == MOVE_ATTACK_ENEMY) {
+                            // Enemy bumped into another enemy
+                            uint8_t target_x = dynamicdata_get_x(e->dynamic_data) + edx;
+                            uint8_t target_y = dynamicdata_get_y(e->dynamic_data) + edy;
+                            
+                            for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
+                                Enemy* victim = &state->enemies[j];
+                                if (dynamicdata_get_hp(victim->dynamic_data) > 0
+                                && dynamicdata_get_x(victim->dynamic_data) == target_x
+                                && dynamicdata_get_y(victim->dynamic_data) == target_y
+                                && victim != e) {
+                                    attack_enemy_on_enemy(state, e, victim);
+                                    break;
+                                }
+                            }
+                        }
+                        continue;
+                    }
+
+                    // Move towards player
+                    int8_t edx = dynamicdata_get_x(state->player.dynamic_data) - dynamicdata_get_x(e->dynamic_data);
+                    int8_t edy = dynamicdata_get_y(state->player.dynamic_data) - dynamicdata_get_y(e->dynamic_data);
+                    
+                    // Clamp movement to 1 tile
+                    if (edx > 1)
+                        edx = 1;
+                    if (edx < -1)
+                        edx = -1;
+                    if (edy > 1)
+                        edy = 1;
+                    if (edy < -1)
+                        edy = -1;
+
+                    uint8_t result = move_entity(state, &e->dynamic_data, edx, edy);
+                    
+                    if (result == MOVE_ATTACK_PLAYER) {
+                        attack_enemy_on_player(state, e);
+                    } else if (result == MOVE_ATTACK_ENEMY) {
+                        // Enemy bumped into another enemy
+                        uint8_t target_x = dynamicdata_get_x(e->dynamic_data) + edx;
+                        uint8_t target_y = dynamicdata_get_y(e->dynamic_data) + edy;
+                        
+                        for (uint8_t j = 0; j < MAX_ENEMIES; j++) {
+                            Enemy* victim = &state->enemies[j];
+                            if (dynamicdata_get_hp(victim->dynamic_data) > 0
+                            && dynamicdata_get_x(victim->dynamic_data) == target_x
+                            && dynamicdata_get_y(victim->dynamic_data) == target_y
+                            && victim != e) {
+                                attack_enemy_on_enemy(state, e, victim);
+                                    break;
+                            }
+                        }
+                    }   
+                }
+
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+            } else {
+                log_msg(state, "Invalid Move");
+            }
+            break;
+        case InputKeyBack:
+            state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+            break;
+        default:
+            break;
+    }
+
+    if (moved_cursor) {
+        int new_x = state->cursor.x + dx;
+        int new_y = state->cursor.y + dy;
+        
+        // Check adjacency
+        int diff_x = new_x - dynamicdata_get_x(state->player.dynamic_data);
+        int diff_y = new_y - dynamicdata_get_y(state->player.dynamic_data);
+
+        if (diff_x >= -1 && diff_x <= 1 && diff_y >= -1 && diff_y <= 1) {
+            cursor_move(state, dx, dy);
+        }
+    }
 }

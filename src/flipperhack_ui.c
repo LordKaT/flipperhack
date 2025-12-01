@@ -214,7 +214,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
 
     // Draw Cursor
-    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CURSOR && state->cursor.active) {
+    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CURSOR
+    || splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_DIRECTION_SELECT) {
         uint8_t c_screen_x = (state->cursor.x - state->camera_x) * TILE_SIZE;
         uint8_t c_screen_y = (state->cursor.y - state->camera_y) * TILE_SIZE + 12;
         

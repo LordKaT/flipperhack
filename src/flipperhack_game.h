@@ -18,6 +18,7 @@
 #include "flipperhack_splitbyte.h"
 #include "flipperhack_dynamicdata.h"
 #include "flipperhack_staticdata.h"
+#include "flipperhack_cursor.h"
 #include "flipperhack_map.h"
 #include "flipperhack_fov.h"
 #include "flipperhack_item.h"

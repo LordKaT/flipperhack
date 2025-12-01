@@ -1,9 +1,9 @@
-#include "flipperhack_cursor.h"
+#include "flipperhack_game.h"
 
 void cursor_init(GameState* state) {
     state->cursor.x = dynamicdata_get_x(state->player.dynamic_data);
     state->cursor.y = dynamicdata_get_y(state->player.dynamic_data);
-    state->cursor.active = true;
+    //state->cursor.active = true;
     log_msg(state, "Cursor Mode");
 }
 
@@ -21,16 +21,29 @@ void cursor_move(GameState* state, int dx, int dy) {
     if (new_y >= MAP_HEIGHT)
         new_y = MAP_HEIGHT - 1;
     
-    #define VIEW_WIDTH_LOCAL 21
-    #define VIEW_HEIGHT_LOCAL 8
-    
-    if (new_x < state->camera_x) new_x = state->camera_x;
-    if (new_y < state->camera_y) new_y = state->camera_y;
-    if (new_x >= state->camera_x + VIEW_WIDTH_LOCAL) new_x = state->camera_x + VIEW_WIDTH_LOCAL - 1;
-    if (new_y >= state->camera_y + VIEW_HEIGHT_LOCAL) new_y = state->camera_y + VIEW_HEIGHT_LOCAL - 1;
+    if (new_x < state->camera_x)
+        new_x = state->camera_x;
+    if (new_y < state->camera_y)
+        new_y = state->camera_y;
+    if (new_x >= state->camera_x + VIEW_WIDTH_LOCAL)
+        new_x = state->camera_x + VIEW_WIDTH_LOCAL - 1;
+    if (new_y >= state->camera_y + VIEW_HEIGHT_LOCAL)
+        new_y = state->camera_y + VIEW_HEIGHT_LOCAL - 1;
 
     state->cursor.x = new_x;
     state->cursor.y = new_y;
+
+    if (state->cursor.x == dynamicdata_get_x(state->player.dynamic_data) && state->cursor.y == dynamicdata_get_y(state->player.dynamic_data)) {
+        log_msg(state, "You!");
+    } else if (!state->map.tiles[state->cursor.x][state->cursor.y].visible) {
+        log_msg(state, "Unknown");
+    } else if (state->map.tiles[state->cursor.x][state->cursor.y].type == TILE_WALL) {
+        log_msg(state, "Wall");
+    } else if (state->map.tiles[state->cursor.x][state->cursor.y].type == TILE_FLOOR) {
+        log_msg(state, "Floor");
+    } else if (state->map.tiles[state->cursor.x][state->cursor.y].type == TILE_DOOR) {
+        log_msg(state, "Door");
+    }
 }
 
 void game_mode_cursor(GameState* state, InputKey key) {
@@ -51,12 +64,12 @@ void game_mode_cursor(GameState* state, InputKey key) {
             // Select target
             log_msg(state, "Selected: %d, %d", state->cursor.x, state->cursor.y);
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-            state->cursor.active = false;
+            //state->cursor.active = false;
             break;
         case InputKeyBack:
             // Cancel
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-            state->cursor.active = false;
+            //state->cursor.active = false;
             break;
         default:
             break;

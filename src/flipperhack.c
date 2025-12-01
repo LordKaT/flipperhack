@@ -52,6 +52,9 @@ static inline void handle_input(GameState* state, InputKey key, InputType type) 
         case GAME_MODE_CURSOR:
             game_mode_cursor(state, key);
             break;
+        case GAME_MODE_DIRECTION_SELECT:
+            game_mode_direction_select(state, key);
+            break;
         default:
             break;
         

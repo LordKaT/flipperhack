@@ -2,6 +2,11 @@
 
 #define NAME_SIZE           16 // 15 + \0
 
+// Cursor mode viewport
+// figure out how to do this better
+#define VIEW_WIDTH_LOCAL 21
+#define VIEW_HEIGHT_LOCAL 8
+
 #define MAP_WIDTH           128
 #define MAP_HEIGHT          128
 #define INVENTORY_CAPACITY  5
@@ -18,6 +23,7 @@
 #define GAME_MODE_GAME_OVER   6
 #define GAME_MODE_QUIT        7
 #define GAME_MODE_CURSOR      8
+#define GAME_MODE_DIRECTION_SELECT 9
 
 #define TILE_EMPTY          0
 #define TILE_FLOOR          1
