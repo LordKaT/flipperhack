@@ -88,6 +88,13 @@ void ui_draw_image(Canvas* canvas, uint16_t rel_path_id) {
 
     furi_record_close(RECORD_STORAGE);
 }
+
+void ui_clear_tile(Canvas* canvas, uint8_t x, uint8_t y) {
+    canvas_invert_color(canvas);
+    canvas_draw_box(canvas, x, y, TILE_SIZE - 1, TILE_SIZE - 1);
+    canvas_invert_color(canvas);
+}
+
 void ui_render(Canvas* canvas, GameState* state) {
     if (!state)
         return;
@@ -126,16 +133,27 @@ void ui_render(Canvas* canvas, GameState* state) {
             if (!tile.explored)
                 continue; // Don't draw unexplored
 
-            if (tile.type == TILE_WALL) {
-                canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
-            } else if (tile.type == TILE_FLOOR) {
-                canvas_draw_dot(canvas, screen_x + TILE_SIZE/2 - 1, screen_y + TILE_SIZE/2 - 1);
-            } else if (tile.type == TILE_STAIRS_UP) {
-                canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "<");
-            } else if (tile.type == TILE_STAIRS_DOWN) {
-                canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, ">");
-            } else if (tile.type == TILE_EMPTY) {
-                canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "X");
+            switch (tile.type) {
+                case TILE_EMPTY:
+                    canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "X");
+                    break;
+                case TILE_FLOOR:
+                    canvas_draw_dot(canvas, screen_x + TILE_SIZE/2 - 1, screen_y + TILE_SIZE/2 - 1);
+                    break;
+                case TILE_WALL:
+                    canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
+                    break;
+                case TILE_STAIRS_UP:
+                    canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "<");
+                    break;
+                case TILE_STAIRS_DOWN:
+                    canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, ">");
+                    break;
+                case TILE_DOOR:
+                    canvas_draw_str(canvas, screen_x, screen_y + TILE_SIZE, "+");
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -154,9 +172,7 @@ void ui_render(Canvas* canvas, GameState* state) {
             // clear the tile
             uint8_t screen_x = (dynamicdata_get_x(e->dynamic_data) - state->camera_x) * TILE_SIZE;
             uint8_t screen_y = (dynamicdata_get_y(e->dynamic_data) - state->camera_y) * TILE_SIZE + 12;
-            canvas_invert_color(canvas);
-            canvas_draw_box(canvas, screen_x, screen_y, TILE_SIZE - 1, TILE_SIZE - 1);
-            canvas_invert_color(canvas);
+            ui_clear_tile(canvas, screen_x, screen_y);
 
             char glyph_str[2] = {0};
             rom_read_enemy(state->enemies[i].id, NULL, NULL, NULL, &glyph_str[0]);
@@ -167,6 +183,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     // Draw Player
     uint8_t p_screen_x = (dynamicdata_get_x(state->player.dynamic_data) - state->camera_x) * TILE_SIZE;
     uint8_t p_screen_y = (dynamicdata_get_y(state->player.dynamic_data) - state->camera_y) * TILE_SIZE + 12;
+    ui_clear_tile(canvas, p_screen_x, p_screen_y);
     canvas_draw_disc(canvas, p_screen_x + TILE_SIZE/2 -1, p_screen_y + TILE_SIZE/2 - 1, TILE_SIZE/2 - 1);
 
     // Draw HUD

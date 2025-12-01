@@ -23,10 +23,10 @@
 
 #define DYNAMIC_HP_BITS     8u
 #define DYNAMIC_SP_BITS     8u
-#define DYNAMIC_X_BITS      5u
-#define DYNAMIC_Y_BITS      5u
+#define DYNAMIC_X_BITS      6u
+#define DYNAMIC_Y_BITS      6u
 #define DYNAMIC_STATE_BITS  2u
-#define DYNAMIC_FX_BITS     4u
+#define DYNAMIC_FX_BITS     2u
 
 #define DYNAMIC_HP_MASK     ((1u << DYNAMIC_HP_BITS)     - 1u)     // 0xFF
 #define DYNAMIC_SP_MASK     ((1u << DYNAMIC_SP_BITS)     - 1u)     // 0xFF
@@ -38,9 +38,9 @@
 #define DYNAMIC_HP_SHIFT        0u
 #define DYNAMIC_SP_SHIFT        8u
 #define DYNAMIC_X_SHIFT         16u
-#define DYNAMIC_Y_SHIFT         21u
-#define DYNAMIC_STATE_SHIFT     26u
-#define DYNAMIC_FX_SHIFT        28u
+#define DYNAMIC_Y_SHIFT         22u
+#define DYNAMIC_STATE_SHIFT     28u
+#define DYNAMIC_FX_SHIFT        30u
 
 static inline uint32_t dynamicdata_pack(
     uint8_t hp,
