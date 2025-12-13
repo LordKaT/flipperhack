@@ -17,34 +17,31 @@ with open("data/rom/menus.yaml", "r") as f:
     menus = yaml.safe_load(f)
     menu_name_map = {menu["name"]: index for index, menu in enumerate(menus)}
 
-'''
-file layout:
-BYTE menu_id
-BYTE num_items
-Repeat num_items times:
-    BYTE string_id
-    BYTE action_id
-    BYTE target_menu (or 0xff for none)
-    BYTE flags (??)
-BYTE 0x00 (terminator)
-'''
-
 with open(bin_path, "wb") as f:
     for menu in menus:
+        start_offset = f.tell()
+
         mid = menu_id_map[menu["id"]]
         name = menu_name_map[menu["name"]]
         items = menu["items"]
-        num_items = len(items)
 
-        f.write(bytes([mid, num_items]))
+        f.write(bytes([mid, name]))
+
         for item in items:
             text_id = string_id_map[item["text"]]
             action_id = act_id_map[item["action"]]
-            target_menu = 0xff
-            if "target_menu" in item:
-                target_menu = menu_id_map[item["target_menu"]]
-            flags = 0
-            if "flags" in item:
-                flags = item["flags"]
-            f.write(bytes([text_id, action_id, target_menu, flags]))
-    f.write(bytes([0]))
+            f.write(bytes([text_id, action_id]))
+
+        end_offset = f.tell()
+        bytes_written = end_offset - start_offset
+
+        if bytes_written > MENU_ENTRY_SIZE:
+            raise ValueError(
+                f"Menu '{menu['name']}' exceeds {MENU_ENTRY_SIZE} bytes "
+                f"({bytes_written} written)"
+            )
+
+        padding_needed = MENU_ENTRY_SIZE - bytes_written
+        f.write(bytes([0xFF] * padding_needed))
+
+print(f"✓ Wrote menutable: {bin_path}")

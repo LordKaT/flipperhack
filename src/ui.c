@@ -206,12 +206,8 @@ void ui_render(Canvas* canvas, GameState* state) {
     canvas_draw_str(canvas, 0, 10, buffer);
 
     // Draw Menu Overlay
-    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_MENU || 
-        splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_INVENTORY || 
-        splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_EQUIPMENT) {
-        
+    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_MENU) {
         menu_draw(canvas, &state->menu);
-
     } else if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_GAME_OVER) {
         ui_draw_image(canvas, STR_GAMEOVER_BIN);
         return;

@@ -58,11 +58,12 @@ string_entries = [
 ]
 
 menu_entries = [
-    ("MENU_MAIN",           0),
-    ("MENU_GAME",           1),
-    ("MENU_EQUIPMENT",      2),
-    ("MENU_INVENTORY",      3),
-    ("MENU_DEBUG",          254),
+    ("MENU_MAIN",           0x00),
+    ("MENU_GAME",           0x01),
+    ("MENU_EQUIPMENT",      0x02),
+    ("MENU_INVENTORY",      0x03),
+    ("MENU_DEBUG",          0xFE),
+    ("MENU_NULL",           0xFF)
 ]
 
 menu_act_entries = [

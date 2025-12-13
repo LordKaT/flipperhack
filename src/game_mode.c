@@ -244,10 +244,10 @@ void game_mode_menu(GameState* state, InputKey key) {
                     }
                     state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                     break;
+                /*
                 case MENU_ITEM_INVENTORY:
                     state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                     log_msg(state, rom_read_string(STR_NOT_IMPLEMENTED));
-                    /*
                     state->mode = GAME_MODE_INVENTORY;
                     menu_init(&state->menu, "Inventory");
                     if (state->player.inventory_count == 0) {
@@ -257,7 +257,6 @@ void game_mode_menu(GameState* state, InputKey key) {
                             menu_add_item(&state->menu, state->player.inventory[i].name);
                         }
                     }
-                    */
                     break;
                 case MENU_ITEM_EQUIPMENT:
                     state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_EQUIPMENT);
@@ -267,6 +266,7 @@ void game_mode_menu(GameState* state, InputKey key) {
                         menu_add_item(&state->menu, "%s: %s", slots[i], rom_read_string(STR_EMPTY));
                     }
                     break;
+                */
                 case MENU_ITEM_NEW_GAME:
                     game_init(state);
                     break;
@@ -293,35 +293,6 @@ void game_mode_menu(GameState* state, InputKey key) {
         default:
             break;
     }
-}
-
-void game_mode_inventory(GameState* state, InputKey key) {
-    (void) state;
-    (void) key;
-    // unimplemented right now
-    return;
-}
-
-void game_mode_equipment(GameState* state, InputKey key) {
-    uint8_t selection = 0;
-    switch (menu_handle_input(&state->menu, key, &selection)) {
-        case MENU_RESULT_CANCELED:
-            game_open_main_menu(state);
-            break;
-        case MENU_RESULT_SELECTED:
-            FURI_LOG_I("FlipperHack", "%s%d", rom_read_string(STR_SELECTED), selection);
-            break;
-        default:
-            break;
-    }
-    return;
-}
-
-void game_mode_item_action(GameState* state, InputKey key) {
-    (void) state;
-    (void) key;
-    // unimplemented right now
-    return;
 }
 
 void game_mode_game_over(GameState* state, InputKey key) {

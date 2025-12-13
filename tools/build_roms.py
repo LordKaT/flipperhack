@@ -8,11 +8,15 @@ NAME_SIZE = 16
 
 string_id_map = { name: idx for idx, (name, _) in enumerate(string_entries) }
 
+enemies_bin = "data/rom/dist/enemies.rom"
+items_bin = "data/rom/dist/items.rom"
+tiles_bin = "data/rom/dist/tiles.rom"
+
 with open("data/rom/enemies.yaml", "r") as f:
     enemies = yaml.safe_load(f)
     f.close()
 
-with open("data/rom/dist/enemies.rom", "wb") as rom:
+with open(enemies_bin, "wb") as rom:
 
     for enemy in enemies:
         buf = bytearray(ENTRY_SIZE)
@@ -33,11 +37,13 @@ with open("data/rom/dist/enemies.rom", "wb") as rom:
     
     rom.close()
 
+print(f"✓ Wrote enemies: {enemies_bin}")
+
 with open("data/rom/items.yaml", "r") as f:
     items = yaml.safe_load(f)
     f.close()
 
-with open("data/rom/dist/items.rom", "wb") as rom:
+with open(items_bin, "wb") as rom:
 
     for item in items:
         buf = bytearray(ENTRY_SIZE)
@@ -52,11 +58,13 @@ with open("data/rom/dist/items.rom", "wb") as rom:
     
     rom.close()
 
+print(f"✓ Wrote items: {items_bin}")
+
 with open("data/rom/tiles.yaml", "r") as f:
     tiles = yaml.safe_load(f)
     f.close()
 
-with open("data/rom/dist/tiles.rom", "wb") as rom:
+with open(tiles_bin, "wb") as rom:
 
     for tile in tiles:
         buf = bytearray(ENTRY_SIZE)
@@ -76,3 +84,5 @@ with open("data/rom/dist/tiles.rom", "wb") as rom:
         rom.write(buf)
     
     rom.close()
+
+print(f"✓ Wrote tiles: {tiles_bin}")

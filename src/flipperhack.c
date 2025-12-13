@@ -34,15 +34,6 @@ static inline void handle_input(GameState* state, InputKey key, InputType type) 
         case GAME_MODE_MENU:
             game_mode_menu(state, key);
             break;
-        case GAME_MODE_INVENTORY:
-            game_mode_inventory(state, key);
-            break;
-        case GAME_MODE_EQUIPMENT:
-            game_mode_equipment(state, key);
-            break;
-        case GAME_MODE_ITEM_ACTION:
-            game_mode_item_action(state, key);
-            break;
         case GAME_MODE_GAME_OVER:
             game_mode_game_over(state, key);
             break;

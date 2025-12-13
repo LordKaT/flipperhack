@@ -35,7 +35,7 @@ def invert_bits(in_path, out_path):
     with open(out_path, "wb") as f:
         f.write(inverted)
 
-    print(f"Converted: {in_path}  →  {out_path}")
+    print(f"✓ Converted: {in_path}  →  {out_path}")
     print(f"Input bytes: {len(data)}, Output bytes: {len(inverted)}")
 
 def main():
@@ -64,8 +64,7 @@ def main():
         else:
             print(f"[SKIP] dist up-to-date: {dist_file.name}")
 
-    print("\n🎉 Assets converted successfully!")
-
+    print(f"✓ Assets converted successfully!")
 
 if __name__ == "__main__":
     main()
