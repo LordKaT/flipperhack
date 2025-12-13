@@ -8,6 +8,7 @@ extern void game_mode_menu(GameState* state, InputKey key);
 extern void game_mode_inventory(GameState* state, InputKey key);
 extern void game_mode_equipment(GameState* state, InputKey key);
 extern void game_mode_item_action(GameState* state, InputKey key);
+extern void game_mode_create_character(GameState* state, InputKey key);
 extern void game_mode_game_over(GameState* state, InputKey key);
 //extern void game_mode_cursor(GameState* state, InputKey key);
 void game_mode_direction_select(GameState* state, InputKey key);

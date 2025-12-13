@@ -29,10 +29,17 @@ static inline void game_init(GameState* state) {
 
 void game_mode_title(GameState* state, InputKey key) {
     if (key == InputKeyOk) {
-        state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-        game_init(state);
+        state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_CREATE_CHARACTER);
     } else if (key == InputKeyBack) {
         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
+    }
+    return;
+}
+
+void game_mode_create_character(GameState* state, InputKey key) {
+    if (key == InputKeyOk) {
+        state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+        game_init(state);
     }
     return;
 }
@@ -302,7 +309,7 @@ void game_mode_equipment(GameState* state, InputKey key) {
             game_open_main_menu(state);
             break;
         case MENU_RESULT_SELECTED:
-            FURI_LOG_I("FlipperHack", "Selected: %d", selection);
+            FURI_LOG_I("FlipperHack", "%s%d", rom_read_string(STR_SELECTED), selection);
             break;
         default:
             break;

@@ -14,16 +14,17 @@
 #define MAX_ITEMS_ON_FLOOR  30
 #define EQUIPMENT_SLOTS     6
 
-#define GAME_MODE_TITLE       0
-#define GAME_MODE_PLAYING     1
-#define GAME_MODE_MENU        2
-#define GAME_MODE_INVENTORY   3
-#define GAME_MODE_EQUIPMENT   4
-#define GAME_MODE_ITEM_ACTION 5
-#define GAME_MODE_GAME_OVER   6
-#define GAME_MODE_QUIT        7
-#define GAME_MODE_CURSOR      8
-#define GAME_MODE_DIRECTION_SELECT 9
+#define GAME_MODE_TITLE             0
+#define GAME_MODE_PLAYING           1
+#define GAME_MODE_MENU              2
+#define GAME_MODE_INVENTORY         3
+#define GAME_MODE_EQUIPMENT         4
+#define GAME_MODE_ITEM_ACTION       5
+#define GAME_MODE_GAME_OVER         6
+#define GAME_MODE_QUIT              7
+#define GAME_MODE_CURSOR            8
+#define GAME_MODE_DIRECTION_SELECT  9
+#define GAME_MODE_CREATE_CHARACTER  10
 
 #define TILE_EMPTY          0
 #define TILE_FLOOR          1

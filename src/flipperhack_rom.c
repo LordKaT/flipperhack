@@ -12,12 +12,14 @@ static const char* const g_nametable_files[] = {
     ROM_PATH "tiles.nametable"
 };
 
-static const char* const g_string_file = ROM_PATH "strings.stringtable";
+static const char* const g_string_file = ROM_PATH "stringtable";
+// static const char* const g_menu_file = ROM_PATH "menutable";
 
 static Storage* g_storage;
 static File* g_roms[3] = {NULL};
 static File* g_nametables[3] = {NULL};
 static File* g_stringtable = NULL;
+// static File* g_menutable = NULL;
 
 bool rom_open_files() {
     for (uint8_t i = 0; i < 3; i++) {

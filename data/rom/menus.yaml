@@ -1,0 +1,44 @@
+- id: MENU_MAIN
+  name: STR_MAIN_MENU
+  items:
+    - text: STR_NEW_GAME
+      action: MENU_ACT_NEW_GAME
+    - text: STR_QUIT
+      action: MENU_ACT_QUIT
+
+- id: MENU_GAME
+  name: STR_GAME_MENU
+  items:
+    - text: STR_STAIRS
+      action: MENU_ACT_STAIRS
+#    - text: STR_INVENTORY
+#      action: MENU_ACT_MENU
+#      target_menu: MENU_INVENTORY
+#    - text: STR_EQUIPMENT
+#      action: MENU_ACT_MENU
+#      target_menu: MENU_EQUIPMENT
+#    - text: STR_DEBUG
+#      action: MENU_ACT_MENU
+#      target_menu: MENU_DEBUG
+    - text: STR_NEW_GAME
+      action: MENU_ACT_NEW_GAME
+    - text: STR_QUIT
+      action: MENU_ACT_QUIT
+
+# - id: MENU_EQUIPMENT
+#   name: STR_EQUIPMENT
+#   items:
+#     - text: STR_BACK
+#       action: MENU_ACT_BACK
+
+# - id: MENU_INVENTORY
+#   name: STR_INVENTORY
+#   items:
+#     - text: STR_BACK
+#       action: MENU_ACT_BACK
+
+# - id: MENU_DEBUG
+#   name: STR_DEBUG
+#   items:
+#     - text: STR_BACK
+#       action: MENU_ACT_BACK

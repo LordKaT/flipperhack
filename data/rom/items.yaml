@@ -1,4 +1,4 @@
-- name: Health Potion
+- name: STR_HEALTH_POTION
   glyph: '%'
   image: potion.bin
   type: 1

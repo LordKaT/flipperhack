@@ -4,7 +4,7 @@ void cursor_init(GameState* state) {
     state->cursor.x = dynamicdata_get_x(state->player.dynamic_data);
     state->cursor.y = dynamicdata_get_y(state->player.dynamic_data);
     //state->cursor.active = true;
-    log_msg(state, "Cursor Mode");
+    log_msg(state, "%s", rom_read_string(STR_CURSOR_MODE));
 }
 
 void cursor_move(GameState* state, int dx, int dy) {
@@ -34,15 +34,15 @@ void cursor_move(GameState* state, int dx, int dy) {
     state->cursor.y = new_y;
 
     if (state->cursor.x == dynamicdata_get_x(state->player.dynamic_data) && state->cursor.y == dynamicdata_get_y(state->player.dynamic_data)) {
-        log_msg(state, "You!");
+        log_msg(state, "%s", rom_read_string(STR_YOU));
     } else if (!state->map.tiles[state->cursor.x][state->cursor.y].visible) {
-        log_msg(state, "Unknown");
+        log_msg(state, "%s", rom_read_string(STR_UNKNOWN));
     } else if (state->map.tiles[state->cursor.x][state->cursor.y].type == TILE_WALL) {
-        log_msg(state, "Wall");
+        log_msg(state, "%s", rom_read_string(STR_WALL));
     } else if (state->map.tiles[state->cursor.x][state->cursor.y].type == TILE_FLOOR) {
-        log_msg(state, "Floor");
+        log_msg(state, "%s", rom_read_string(STR_FLOOR));
     } else if (state->map.tiles[state->cursor.x][state->cursor.y].type == TILE_DOOR) {
-        log_msg(state, "Door");
+        log_msg(state, "%s", rom_read_string(STR_DOOR));
     }
 }
 
@@ -62,7 +62,7 @@ void game_mode_cursor(GameState* state, InputKey key) {
             break;
         case InputKeyOk:
             // Select target
-            log_msg(state, "Selected: %d, %d", state->cursor.x, state->cursor.y);
+            log_msg(state, "%s%d, %d", rom_read_string(STR_SELECTED), state->cursor.x, state->cursor.y);
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
             //state->cursor.active = false;
             break;

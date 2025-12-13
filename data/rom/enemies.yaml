@@ -1,4 +1,4 @@
-- name: Goblin
+- name: STR_NPC_GOBLIN
   glyph: g
   level: 1
   hp: 10

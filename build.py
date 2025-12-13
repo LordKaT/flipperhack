@@ -31,6 +31,10 @@ BUILD_ROMS = TOOLS_DIR / "build_roms.py"
 # Script that builds stringtable
 BUILD_STRINGTABLE = TOOLS_DIR / "build_stringtable.py"
 
+BUILD_MENUTABLE = TOOLS_DIR / "build_menutable.py"
+
+BUILD_HEADERS = TOOLS_DIR / "build_headers.py"
+
 # ufbt output
 FAP_OUTPUT = Path(os.environ.get("HOME", "")) / ".ufbt" / "build" / "flipperhack.fap"
 
@@ -131,10 +135,30 @@ def build_stringtable():
     print(f"[STRINGTABLE] Running {BUILD_STRINGTABLE.relative_to(ROOT)}")
     run([sys.executable, str(BUILD_STRINGTABLE)], cwd=ROOT)
 
+def build_menutable():
+    if not BUILD_MENUTABLE.exists():
+        print("[MENUTABLE] tools/build_menutable.py not found, skipping menutable generation.")
+        return
+
+    ROM_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"[MENUTABLE] Running {BUILD_MENUTABLE.relative_to(ROOT)}")
+    run([sys.executable, str(BUILD_MENUTABLE)], cwd=ROOT)
+
+def build_headers():
+    if not BUILD_HEADERS.exists():
+        print("[HEADERS] tools/build_headers.py not found, skipping header generation.")
+        return
+
+    ROM_DIST_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"[HEADERS] Running {BUILD_HEADERS.relative_to(ROOT)}")
+    run([sys.executable, str(BUILD_HEADERS)], cwd=ROOT)
+
 def task_assets(_args):
     build_gfx_assets()
     build_rom_assets()
     build_stringtable()
+    build_menutable()
+    build_headers()
     print("[ASSETS] All assets built.")
 
 def task_build(_args):

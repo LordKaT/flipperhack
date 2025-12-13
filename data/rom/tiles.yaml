@@ -1,5 +1,47 @@
-- name: Wall
+- name: STR_WALL
   glyph: "#"
+  walkable: false
+  transparent: false
+  solid: true
+  logic:
+    - LOGIC_DESTRUCTABLE
 
-- name: Floor
+- name: STR_FLOOR
   glyph: "."
+  walkable: true
+  transparent: true
+  solid: false
+
+- name: STR_DOOR_CLOSED
+  glyph: "+"
+  walkable: false
+  transparent: false
+  solid: true
+  logic:
+    - LOGIC_DESTRUCTABLE
+    - LOGIC_DOOR_OPEN
+
+- name: STR_DOOR_OPENED
+  glyph: "-"
+  walkable: true
+  transparent: true
+  solid: false
+  logic:
+    - LOGIC_DESTRUCTABLE
+    - LOGIC_DOOR_CLOSE
+
+- name: STR_STAIRS_UP
+  glyph: "<"
+  walkable: true
+  transparent: true
+  solid: false
+  logic:
+    - LOGIC_STAIRS_UP
+
+- name: STR_STAIRS_DOWN
+  glyph: ">"
+  walkable: true
+  transparent: true
+  solid: false
+  logic:
+    - LOGIC_STAIRS_DOWN

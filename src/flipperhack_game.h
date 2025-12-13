@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <furi.h>
 #include <furi_hal.h>
@@ -10,6 +11,10 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <storage/storage.h>
+
+#include "autogen/flipperhack_logictable.h"
+#include "autogen/flipperhack_menutable.h"
+#include "autogen/flipperhack_stringtable.h"
 
 #include "flipperhack_defs.h"
 #include "flipperhack_menu.h"
@@ -25,7 +30,6 @@
 #include "flipperhack_game_mode.h"
 #include "flipperhack_ui.h"
 #include "flipperhack_rom.h"
-#include "flipperhack_strings.h"
 #include "flipperhack_cursor.h"
 
 

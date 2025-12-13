@@ -105,6 +105,10 @@ void ui_render(Canvas* canvas, GameState* state) {
         ui_draw_image(canvas, STR_TITLE_BIN);
         return;
     }
+
+    if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CREATE_CHARACTER) {
+        return;
+    }
     
     // Update Camera to center on player
     state->camera_x = dynamicdata_get_x(state->player.dynamic_data) - VIEW_WIDTH / 2;
