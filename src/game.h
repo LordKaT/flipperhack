@@ -12,25 +12,25 @@
 #include <input/input.h>
 #include <storage/storage.h>
 
-#include "autogen/flipperhack_logictable.h"
-#include "autogen/flipperhack_menutable.h"
-#include "autogen/flipperhack_stringtable.h"
+#include "autogen/logictable.h"
+#include "autogen/menutable.h"
+#include "autogen/stringtable.h"
 
-#include "flipperhack_defs.h"
-#include "flipperhack_menu.h"
-#include "flipperhack_structs.h"
-#include "flipperhack_stats.h"
-#include "flipperhack_splitbyte.h"
-#include "flipperhack_dynamicdata.h"
-#include "flipperhack_staticdata.h"
-#include "flipperhack_cursor.h"
-#include "flipperhack_map.h"
-#include "flipperhack_fov.h"
-#include "flipperhack_item.h"
-#include "flipperhack_game_mode.h"
-#include "flipperhack_ui.h"
-#include "flipperhack_rom.h"
-#include "flipperhack_cursor.h"
+#include "defs.h"
+#include "menu.h"
+#include "structs.h"
+#include "stats.h"
+#include "splitbyte.h"
+#include "dynamicdata.h"
+#include "staticdata.h"
+#include "cursor.h"
+#include "map.h"
+#include "fov.h"
+#include "item.h"
+#include "game_mode.h"
+#include "ui.h"
+#include "rom.h"
+#include "cursor.h"
 
 
 extern void game_open_main_menu(GameState* state);

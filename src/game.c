@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 void attack_player_on_enemy(GameState* state, Enemy *enemy) {
     // pseudocode

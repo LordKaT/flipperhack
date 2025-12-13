@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 #define MIN_ROOM_SIZE 3
 #define MAX_ROOM_SIZE 8

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from lib.entries import logic_entries, menu_entries, menu_act_entries, string_entries
 
-string_hdr_path = "src/autogen/flipperhack_stringtable.h"
-menu_hdr_path = "src/autogen/flipperhack_menutable.h"
-logic_hdr_path = "src/autogen/flipperhack_logictable.h"
+string_hdr_path = "src/autogen/stringtable.h"
+menu_hdr_path = "src/autogen/menutable.h"
+logic_hdr_path = "src/autogen/logictable.h"
 
 with open(string_hdr_path, "w") as f:
     f.write("#pragma once\n\n")

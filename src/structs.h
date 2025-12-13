@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 typedef struct {
     uint8_t x;
@@ -48,8 +48,16 @@ typedef struct {
 } Map;
 
 typedef struct {
+    uint8_t current_menu_id;
+    uint8_t stack[16];
+    uint8_t stack_top;
+} MenuContext;
+
+typedef struct {
     Map map;
     Player player;
+
+    MenuContext menu_context;
 
     WorldItem items[MAX_ITEMS_ON_FLOOR];
     uint8_t item_count;

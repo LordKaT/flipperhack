@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 #define SCREEN_PIXELS (128 * 64)
 #define SCREEN_W 128

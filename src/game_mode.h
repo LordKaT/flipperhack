@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 extern void game_mode_title(GameState* state, InputKey key);
 extern void game_mode_playing(GameState* state, InputKey key, InputType type);

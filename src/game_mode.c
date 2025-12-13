@@ -1,4 +1,4 @@
-#include "flipperhack_game_mode.h"
+#include "game_mode.h"
 
 static inline void game_init_state(GameState *state) {
     map_generate(state);

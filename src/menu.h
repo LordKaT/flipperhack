@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 #define MENU_MAX_ITEMS 16
 #define MENU_VISIBLE_LINES 5

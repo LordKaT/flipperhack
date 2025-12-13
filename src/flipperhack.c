@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 typedef struct {
     GameState* game_state;

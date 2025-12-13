@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 extern void cursor_init(GameState* state);
 extern void cursor_move(GameState* state, int dx, int dy);

@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 void cursor_init(GameState* state) {
     state->cursor.x = dynamicdata_get_x(state->player.dynamic_data);

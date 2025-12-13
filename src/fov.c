@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 #define FOV_RADIUS 8
 

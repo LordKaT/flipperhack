@@ -1,5 +1,5 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 void ui_render(Canvas* canvas, GameState* state);

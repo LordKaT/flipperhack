@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 // Default actions
 extern void item_default_use_consumable(); // stubbed for now

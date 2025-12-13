@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flipperhack_game.h"
+#include "game.h"
 
 // Initializes the map with walls
 void map_init(GameState* state);

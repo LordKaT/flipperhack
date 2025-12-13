@@ -1,4 +1,4 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 void menu_init(Menu* menu, const char* title) {
     snprintf(menu->title, sizeof(menu->title), "%s", title);

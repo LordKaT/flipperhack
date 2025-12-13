@@ -1,51 +1,39 @@
-#include "flipperhack_game.h"
+#include "game.h"
 
 static const char* const g_rom_files[] = {
-    ROM_PATH "enemies.rom",
-    ROM_PATH "items.rom",
-    ROM_PATH "tiles.rom"
+    ROM_PATH ROM_ENEMIES_PATH,
+    ROM_PATH ROM_ITEMS_PATH,
+    ROM_PATH ROM_TILES_PATH,
+    ROM_PATH ROM_STRINGTABLE_PATH,
+    ROM_PATH ROM_MENUTABLE_PATH
 };
 
-static const char* const g_string_file = ROM_PATH "stringtable";
-static const char* const g_menu_file = ROM_PATH "menutable";
-
 static Storage* g_storage;
-static File* g_roms[3] = {NULL};
-static File* g_stringtable = NULL;
-static File* g_menutable = NULL;
+static File* g_roms[ROM_MAX] = {NULL};
+
+File *rom_allocate_and_open_file(const char *path) {
+    File *file = storage_file_alloc(g_storage);
+    if (!file) {
+        FURI_LOG_E("ROM", "Alloc fail: %s", path);
+        return NULL;
+    }
+
+    if (!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_free(file);
+        FURI_LOG_E("ROM", "Open fail: %s", path);
+        return NULL;
+    }
+
+    return file;
+}
 
 bool rom_open_files() {
-    for (uint8_t i = 0; i < 3; i++) {
-        g_roms[i] = storage_file_alloc(g_storage);
+    for (uint8_t i = 0; i < ROM_MAX; i++) {
+        g_roms[i] = rom_allocate_and_open_file(g_rom_files[i]);
 
         if (!g_roms[i]) {
-            FURI_LOG_E("ROM", "Alloc fail: %s", g_rom_files[i]);
             return false;
         }
-
-        if (!storage_file_open(g_roms[i], g_rom_files[i], FSAM_READ, FSOM_OPEN_EXISTING)) {
-            storage_file_free(g_roms[i]);
-            FURI_LOG_E("ROM", "Open fail: %s", g_rom_files[i]);
-            return false;
-        }
-    }
-
-    g_stringtable = storage_file_alloc(g_storage);
-    if (!g_stringtable) {
-        FURI_LOG_E("ROM", "Alloc fail: %s", g_string_file);
-        return false;
-    }
-
-    g_menutable = storage_file_alloc(g_storage);
-    if (!g_menutable) {
-        FURI_LOG_E("ROM", "Alloc fail: %s", g_menu_file);
-        return false;
-    }
-
-    if (!storage_file_open(g_stringtable, g_string_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        storage_file_free(g_stringtable);
-        FURI_LOG_E("ROM", "Open fail: %s", g_string_file);
-        return false;
     }
     
     return true;
@@ -53,18 +41,18 @@ bool rom_open_files() {
 
 bool rom_init() {
     if (!furi_hal_sd_is_present()) {
-        FURI_LOG_E("ROM", "SD Card Fail!");
+        FURI_LOG_E("ROM", "%s", rom_read_string(STR_SD_FAIL));
         return false;
     }
 
     g_storage = furi_record_open(RECORD_STORAGE);
     if (!g_storage) {
-        FURI_LOG_E("ROM", "RECORD_STORAGE Fail!");
+        FURI_LOG_E("ROM", "%s", rom_read_string(STR_RECORD_STORAGE_FAIL));
         return false;
     }
 
     if (!rom_open_files()) {
-        FURI_LOG_E("ROM", "ROM Fail!");
+        FURI_LOG_E("ROM", "%s", rom_read_string(STR_ROM_FAIL));
         rom_deinit();
         return false;
     }
@@ -74,22 +62,12 @@ bool rom_init() {
 
 bool rom_deinit() {
     if (g_storage) {
-        for (uint8_t i = 0; i < 3; i++) {
+        for (uint8_t i = 0; i < ROM_MAX; i++) {
             if (g_roms[i]) {
                 storage_file_close(g_roms[i]);
                 storage_file_free(g_roms[i]);
                 g_roms[i] = NULL;
             }
-        }
-        if (g_stringtable) {
-            storage_file_close(g_stringtable);
-            storage_file_free(g_stringtable);
-            g_stringtable = NULL;
-        }
-        if (g_menutable) {
-            storage_file_close(g_menutable);
-            storage_file_free(g_menutable);
-            g_menutable = NULL;
         }
         furi_record_close(RECORD_STORAGE);
         g_storage = NULL;
@@ -162,23 +140,22 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
     return true;
 }
 
-#define STRING_SIZE 32
-char string_out[STRING_SIZE];
+char string_out[ROM_STRING_SIZE];
 
 char* rom_read_string(uint8_t id) {
-    uint32_t offset = (uint32_t)id * STRING_SIZE;
-    memset(string_out, 0, STRING_SIZE);
+    uint32_t offset = (uint32_t)id * ROM_STRING_SIZE;
+    memset(string_out, 0, ROM_STRING_SIZE);
 
-    if (!storage_file_seek(g_stringtable, offset, true)) {
+    if (!storage_file_seek(g_roms[ROM_STRINGTABLE], offset, true)) {
         return NULL;
     }
 
-    if (storage_file_read(g_stringtable, string_out, STRING_SIZE) != STRING_SIZE) {
+    if (storage_file_read(g_roms[ROM_STRINGTABLE], string_out, ROM_STRING_SIZE) != ROM_STRING_SIZE) {
         return NULL;
     }
 
     // sanity check
-    string_out[STRING_SIZE - 1] = '\0';
+    string_out[ROM_STRING_SIZE - 1] = '\0';
 
     return string_out;
 }
