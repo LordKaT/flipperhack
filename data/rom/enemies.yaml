@@ -1,4 +1,4 @@
-- name: STR_NPC_GOBLIN
+- name: STR_GOBLIN
   glyph: g
   level: 1
   hp: 10

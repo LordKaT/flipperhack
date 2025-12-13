@@ -43,7 +43,7 @@
 #define STR_GAME_MENU            37     // "Game Menu"
 #define STR_DEBUG                38     // "Debug"
 #define STR_BACK                 39     // "Back"
-#define STR_NPC_GOBLIN           40     // "Goblin"
+#define STR_GOBLIN               40     // "Goblin"
 #define STR_HEALTH_POTION        41     // "Health Potion"
 #define STR_WALL                 42     // "Wall"
 #define STR_FLOOR                43     // "Floor"

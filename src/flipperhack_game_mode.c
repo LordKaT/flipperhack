@@ -280,7 +280,7 @@ void game_mode_menu(GameState* state, InputKey key) {
                 case MENU_ITEM_ENEMIES:
                     //state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
                     for (int i = 0; i < MAX_ENEMIES; i++) {
-                        FURI_LOG_I("game", "Enemy %d: %s %d,%d", i, rom_read_enemy_name(state->enemies[i].id), dynamicdata_get_x(state->enemies[i].dynamic_data), dynamicdata_get_y(state->enemies[i].dynamic_data));
+                        FURI_LOG_I("game", "Enemy %d: %s %d,%d", i, rom_read_string(state->enemies[i].id), dynamicdata_get_x(state->enemies[i].dynamic_data), dynamicdata_get_y(state->enemies[i].dynamic_data));
                     }
                     break;
                 case MENU_ITEM_CURSOR:

@@ -44,7 +44,7 @@ string_entries = [
     ("STR_DEBUG",               "Debug"),
     ("STR_BACK",                "Back"),
 
-    ("STR_NPC_GOBLIN",          "Goblin"),
+    ("STR_GOBLIN",              "Goblin"),
 
     ("STR_HEALTH_POTION",       "Health Potion"),
 
@@ -93,13 +93,3 @@ logic_entries = {
     "LOGIC_TELEPORT":       1 << 5,
     "LOGIC_SCRIPT":         1 << 31
 }
-'''
-    ("LOGIC_NONE",          0),
-    ("LOGIC_DESTRUCTABLE",  1),
-    ("LOGIC_DOOR_OPEN",     3),
-    ("LOGIC_DOOR_CLOSE",    4),
-    ("LOGIC_STAIRS_UP",     5),
-    ("LOGIC_STAIRS_DOWN",   6),
-    ("LOGIC_TELEPORT",      7),
-]
-'''

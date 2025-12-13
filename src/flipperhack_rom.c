@@ -6,33 +6,20 @@ static const char* const g_rom_files[] = {
     ROM_PATH "tiles.rom"
 };
 
-static const char* const g_nametable_files[] = {
-    ROM_PATH "enemies.nametable",
-    ROM_PATH "items.nametable",
-    ROM_PATH "tiles.nametable"
-};
-
 static const char* const g_string_file = ROM_PATH "stringtable";
-// static const char* const g_menu_file = ROM_PATH "menutable";
+static const char* const g_menu_file = ROM_PATH "menutable";
 
 static Storage* g_storage;
 static File* g_roms[3] = {NULL};
-static File* g_nametables[3] = {NULL};
 static File* g_stringtable = NULL;
-// static File* g_menutable = NULL;
+static File* g_menutable = NULL;
 
 bool rom_open_files() {
     for (uint8_t i = 0; i < 3; i++) {
         g_roms[i] = storage_file_alloc(g_storage);
-        g_nametables[i] = storage_file_alloc(g_storage);
 
         if (!g_roms[i]) {
             FURI_LOG_E("ROM", "Alloc fail: %s", g_rom_files[i]);
-            return false;
-        }
-
-        if (!g_nametables[i]) {
-            FURI_LOG_E("ROM", "Alloc fail: %s", g_nametable_files[i]);
             return false;
         }
 
@@ -41,17 +28,17 @@ bool rom_open_files() {
             FURI_LOG_E("ROM", "Open fail: %s", g_rom_files[i]);
             return false;
         }
-
-        if (!storage_file_open(g_nametables[i], g_nametable_files[i], FSAM_READ, FSOM_OPEN_EXISTING)) {
-            storage_file_free(g_nametables[i]);
-            FURI_LOG_E("ROM", "Open fail: %s", g_nametable_files[i]);
-            return false;
-        }
     }
 
     g_stringtable = storage_file_alloc(g_storage);
     if (!g_stringtable) {
         FURI_LOG_E("ROM", "Alloc fail: %s", g_string_file);
+        return false;
+    }
+
+    g_menutable = storage_file_alloc(g_storage);
+    if (!g_menutable) {
+        FURI_LOG_E("ROM", "Alloc fail: %s", g_menu_file);
         return false;
     }
 
@@ -93,16 +80,16 @@ bool rom_deinit() {
                 storage_file_free(g_roms[i]);
                 g_roms[i] = NULL;
             }
-            if (g_nametables[i]) {
-                storage_file_close(g_nametables[i]);
-                storage_file_free(g_nametables[i]);
-                g_nametables[i] = NULL;
-            }
         }
         if (g_stringtable) {
             storage_file_close(g_stringtable);
             storage_file_free(g_stringtable);
             g_stringtable = NULL;
+        }
+        if (g_menutable) {
+            storage_file_close(g_menutable);
+            storage_file_free(g_menutable);
+            g_menutable = NULL;
         }
         furi_record_close(RECORD_STORAGE);
         g_storage = NULL;
@@ -173,27 +160,6 @@ bool rom_read_enemy(uint8_t id, uint32_t* dynamic_data, uint16_t* static_data, u
     }
 
     return true;
-}
-
-// the whole game consists of rubbing against enemies constantly, might as well reserve the space...
-char name_out[NAME_SIZE];
-
-char* rom_read_enemy_name(uint8_t id) {
-    uint32_t offset = (uint32_t)id * NAME_SIZE;
-    memset(name_out, 0, NAME_SIZE);
-
-    if (!storage_file_seek(g_nametables[ROM_ENEMIES], offset, true)) {
-        return NULL;
-    }
-
-    if (storage_file_read(g_nametables[ROM_ENEMIES], name_out, NAME_SIZE) != NAME_SIZE) {
-        return NULL;
-    }
-
-    // sanity check
-    name_out[NAME_SIZE - 1] = '\0';
-
-    return name_out;
 }
 
 #define STRING_SIZE 32
