@@ -17,12 +17,12 @@
 #include "autogen/stringtable.h"
 
 #include "defs.h"
-#include "menu.h"
 #include "structs.h"
 #include "stats.h"
 #include "splitbyte.h"
 #include "dynamicdata.h"
 #include "staticdata.h"
+#include "menu.h"
 #include "cursor.h"
 #include "map.h"
 #include "fov.h"
@@ -32,8 +32,6 @@
 #include "rom.h"
 #include "cursor.h"
 
-
-extern void game_open_main_menu(GameState* state);
 extern uint8_t move_entity(GameState* state, uint32_t* dynamic_data, int dx, int dy);
 extern void attack_player_on_enemy(GameState* state, Enemy *enemy);
 extern void attack_enemy_on_player(GameState* state, Enemy *enemy);

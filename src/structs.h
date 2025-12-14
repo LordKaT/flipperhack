@@ -48,16 +48,29 @@ typedef struct {
 } Map;
 
 typedef struct {
-    uint8_t current_menu_id;
-    uint8_t stack[16];
-    uint8_t stack_top;
-} MenuContext;
+    uint8_t text_id;
+    uint8_t action_id;
+} MenuItem;
+
+typedef struct {
+    uint8_t menu_id;
+    uint8_t name_id;
+    MenuItem items[MENU_MAX_ITEMS];
+} MenuEntry;
+
+_Static_assert(sizeof(MenuEntry) == MENU_ENTRY_SIZE,
+    "MenuEntry size must be equal to MENU_MAX_ITEMS");
+
+typedef struct {
+    MenuEntry menu_entry;
+    uint8_t count;
+    uint8_t selection;
+    uint8_t scroll_offset;
+} Menu;
 
 typedef struct {
     Map map;
     Player player;
-
-    MenuContext menu_context;
 
     WorldItem items[MAX_ITEMS_ON_FLOOR];
     uint8_t item_count;

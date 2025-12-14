@@ -87,7 +87,8 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
             break;
         case InputKeyOk:
             if (type == InputTypeLong) {
-                game_open_main_menu(state);
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
+                menu_init(&state->menu, 0);
                 return;
             } else if (type == InputTypeShort) {
                 moved = true;
@@ -95,7 +96,8 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
             break;
         case InputKeyBack:
             if (type == InputTypeShort) {
-                game_open_main_menu(state);
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
+                menu_init(&state->menu, 0);
                 return;
             } else if (type == InputTypeLong) {
                 state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
@@ -220,76 +222,34 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
 }
 
 void game_mode_menu(GameState* state, InputKey key) {
-    uint8_t selection = 0;
+    uint8_t selection = menu_handle_input(&state->menu, key);
 
-    switch (menu_handle_input(&state->menu, key, &selection)) {
-        case MENU_RESULT_CANCELED:
+    switch (selection) {
+        case MENU_ACT_QUIT:
+            state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
+            break;
+        case MENU_ACT_BACK: // Back/empty selection (error?)
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
             break;
-        case MENU_RESULT_SELECTED:
-            switch(selection) {
-                case MENU_ITEM_STAIRS:
-                    if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_DOWN) {
-                        // Go down (Generate new map for now)
-                        game_init_state(state);
-                        state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                        state->dungeon_level++;
-                        log_msg(state, rom_read_string(STR_DESCEND), state->dungeon_level);
-                    } else if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_UP) {
-                        state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                        state->dungeon_level--;
-                        log_msg(state, rom_read_string(STR_ASCEND), state->dungeon_level);
-                    } else {
-                        log_msg(state, rom_read_string(STR_NO_STAIRS));
-                    }
-                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                    break;
-                /*
-                case MENU_ITEM_INVENTORY:
-                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                    log_msg(state, rom_read_string(STR_NOT_IMPLEMENTED));
-                    state->mode = GAME_MODE_INVENTORY;
-                    menu_init(&state->menu, "Inventory");
-                    if (state->player.inventory_count == 0) {
-                        menu_add_item(&state->menu, "(Empty)");
-                    } else {
-                        for(int i=0; i<state->player.inventory_count; i++) {
-                            menu_add_item(&state->menu, state->player.inventory[i].name);
-                        }
-                    }
-                    break;
-                case MENU_ITEM_EQUIPMENT:
-                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_EQUIPMENT);
-                    menu_init(&state->menu, "Equipment");
-                    const char* slots[] = {"Head", "Body", "Legs", "Feet", "L.Hand", "R.Hand"};
-                    for (int i = 0; i < EQUIPMENT_SLOTS; i++) {
-                        menu_add_item(&state->menu, "%s: %s", slots[i], rom_read_string(STR_EMPTY));
-                    }
-                    break;
-                */
-                case MENU_ITEM_NEW_GAME:
-                    game_init(state);
-                    break;
-                case MENU_ITEM_QUIT:
-                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
-                    return;
-                case MENU_ITEM_MEMORY:
-                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                    log_msg(state, "M: %u/%u", memmgr_get_free_heap(), memmgr_get_total_heap());
-                    break;
-                case MENU_ITEM_ENEMIES:
-                    //state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
-                    for (int i = 0; i < MAX_ENEMIES; i++) {
-                        FURI_LOG_I("game", "Enemy %d: %s %d,%d", i, rom_read_string(state->enemies[i].id), dynamicdata_get_x(state->enemies[i].dynamic_data), dynamicdata_get_y(state->enemies[i].dynamic_data));
-                    }
-                    break;
-                case MENU_ITEM_CURSOR:
-                    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_CURSOR);
-                    cursor_init(state);
-                    break;
-                default:
-                    break;
-            }
+        case MENU_ACT_STAIRS:
+            if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_DOWN) {
+                // Go down (Generate new map for now)
+                game_init_state(state);
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+                state->dungeon_level++;
+                log_msg(state, "%s%d", rom_read_string(STR_DESCEND), state->dungeon_level);
+            } else if (state->map.tiles[dynamicdata_get_x(state->player.dynamic_data)][dynamicdata_get_y(state->player.dynamic_data)].type == TILE_STAIRS_UP) {
+                // Go up (check for ascenion at level == 0)
+                game_init_state(state);
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+                state->dungeon_level--;
+                log_msg(state, "%s%d", rom_read_string(STR_ASCEND), state->dungeon_level);
+            } else
+                log_msg(state, rom_read_string(STR_NO_STAIRS));
+            state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
+            break;
+        case MENU_ACT_NONE:
+            break;
         default:
             break;
     }

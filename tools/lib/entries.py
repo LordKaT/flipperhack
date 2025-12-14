@@ -67,12 +67,12 @@ menu_entries = [
 ]
 
 menu_act_entries = [
-    ("MENU_ACT_QUIT",       0),
-    ("MENU_ACT_NEW_GAME",   1),
-    ("MENU_ACT_BACK",       2),
-    ("MENU_ACT_MENU",       3),
-    ("MENU_ACT_STAIRS",     4),
-    ("MENU_ACT_DEBUG",      254),
+    ("MENU_ACT_QUIT",       0x00),
+    ("MENU_ACT_NEW_GAME",   0x01),
+    ("MENU_ACT_STAIRS",     0x02),
+    ("MENU_ACT_DEBUG",      0xFD),
+    ("MENU_ACT_BACK",       0xFE),
+    ("MENU_ACT_NONE",       0xFF)
 ]
 
 tile_entries = [

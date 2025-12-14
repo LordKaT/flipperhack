@@ -55,3 +55,8 @@
 #define MOVE_BLOCKED        1
 #define MOVE_ATTACK_PLAYER  2
 #define MOVE_ATTACK_ENEMY   3
+
+#define MENU_ENTRY_SIZE     32
+#define MENU_MAX_ITEMS      15
+#define MENU_MAX_STACK      8
+#define MENU_VISIBLE_LINES  8

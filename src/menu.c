@@ -1,31 +1,23 @@
-#include "game.h"
+#include "menu.h"
 
-void menu_init(Menu* menu, const char* title) {
-    snprintf(menu->title, sizeof(menu->title), "%s", title);
+void menu_init(Menu* menu, uint8_t menu_id) {
+    memset(menu, 0, sizeof(Menu));
+    rom_read_data(menu_id, ROM_MENUTABLE, &menu->menu_entry, sizeof(MenuEntry));
     menu->count = 0;
-    menu->selection = 0;
-    menu->scroll_offset = 0;
+    while (menu->menu_entry.items[menu->count].text_id != 0xff)
+        menu->count++;
 }
 
-void menu_add_item(Menu* menu, const char* fmt, ...) {
-    if (menu->count >= MENU_MAX_ITEMS)
-        return;
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(menu->items[menu->count], sizeof(menu->items[0]), fmt, args);
-    va_end(args);
-    menu->count++;
-}
-
-uint8_t menu_handle_input(Menu* menu, InputKey key, uint8_t* selected_index) {
+uint8_t menu_handle_input(Menu* menu, InputKey key) {
     if (key == InputKeyBack) {
-        return MENU_RESULT_CANCELED;
+        return MENU_ACT_BACK;
     }
-    
+
     if (key == InputKeyUp) {
         menu->selection--;
         if (menu->selection >= menu->count) {
             menu->selection = menu->count - 1; // Wrap to bottom
+
             // Adjust scroll to show bottom
             if (menu->count > MENU_VISIBLE_LINES) {
                 menu->scroll_offset = menu->count - MENU_VISIBLE_LINES;
@@ -52,11 +44,10 @@ uint8_t menu_handle_input(Menu* menu, InputKey key, uint8_t* selected_index) {
         }
         
     } else if (key == InputKeyOk) {
-        *selected_index = menu->selection;
-        return MENU_RESULT_SELECTED;
+        return menu->menu_entry.items[menu->selection].action_id;
     }
     
-    return MENU_RESULT_NONE;
+    return MENU_ACT_NONE;
 }
 
 void menu_draw(Canvas* canvas, Menu* menu) {
@@ -67,7 +58,7 @@ void menu_draw(Canvas* canvas, Menu* menu) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, 5, 2, 118, 60);
     
-    canvas_draw_str(canvas, 10, 12, menu->title);
+    canvas_draw_str(canvas, 10, 12, rom_read_string(menu->menu_entry.name_id));
     canvas_draw_line(canvas, 10, 14, 113, 14); // Separator line
     
     int y_start = 24;
@@ -75,16 +66,14 @@ void menu_draw(Canvas* canvas, Menu* menu) {
     
     for (int i = 0; i < MENU_VISIBLE_LINES; i++) {
         int item_index = menu->scroll_offset + i;
-        if (item_index >= menu->count) break;
-        
+        if (item_index >= menu->count)
+            break;
+
         int y = y_start + i * line_height;
-        
-        if (item_index == menu->selection) {
+
+        if (item_index == menu->selection)
             canvas_draw_str(canvas, 10, y, ">");
-            canvas_draw_str(canvas, 20, y, menu->items[item_index]);
-        } else {
-            canvas_draw_str(canvas, 20, y, menu->items[item_index]);
-        }
+        canvas_draw_str(canvas, 20, y, rom_read_string(menu->menu_entry.items[item_index].text_id));
     }
     
     // Scroll indicators

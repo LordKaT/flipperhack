@@ -60,6 +60,7 @@ bool draw_bin_image(Canvas* canvas, Storage* storage, const char* path, int x0, 
     storage_file_free(file);
     return ok;
 }
+
 void ui_draw_image(Canvas* canvas, uint16_t rel_path_id) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -107,6 +108,11 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
 
     if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CREATE_CHARACTER) {
+        MenuEntry menu_entry;
+        rom_read_data(0, ROM_MENUTABLE, &menu_entry, sizeof(MenuEntry));
+        char temp[ROM_STRING_SIZE];
+        memcpy(temp, rom_read_string(menu_entry.name_id), ROM_STRING_SIZE);
+        canvas_draw_str(canvas, 10, 10, temp);
         return;
     }
     

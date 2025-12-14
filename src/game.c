@@ -41,19 +41,6 @@ uint8_t attack(GameState* state, uint32_t* stats_attacker, uint32_t* stats_victi
     return damage;
 }
 
-void game_open_main_menu(GameState* state) {
-    state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
-    menu_init(&state->menu, "Menu");
-    menu_add_item(&state->menu, "Stairs");
-    menu_add_item(&state->menu, "Inventory");
-    menu_add_item(&state->menu, "Equipment");
-    menu_add_item(&state->menu, "New Game");
-    menu_add_item(&state->menu, "Quit");
-    menu_add_item(&state->menu, "Memory");
-    menu_add_item(&state->menu, "Enemies");
-    menu_add_item(&state->menu, "Cursor");
-}
-
 uint8_t move_entity(GameState* state, uint32_t* dd_entity, int dx, int dy) {
     uint32_t entity_data = *dd_entity;
     uint8_t entity_state = dynamicdata_get_state(entity_data);

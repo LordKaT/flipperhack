@@ -15,14 +15,13 @@ bin_path = "data/rom/dist/menutable"
 
 with open("data/rom/menus.yaml", "r") as f:
     menus = yaml.safe_load(f)
-    menu_name_map = {menu["name"]: index for index, menu in enumerate(menus)}
 
 with open(bin_path, "wb") as f:
     for menu in menus:
         start_offset = f.tell()
 
         mid = menu_id_map[menu["id"]]
-        name = menu_name_map[menu["name"]]
+        name = string_id_map[menu["name"]]
         items = menu["items"]
 
         f.write(bytes([mid, name]))

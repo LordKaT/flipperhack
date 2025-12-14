@@ -11,7 +11,7 @@
 #define MENU_NULL       5   
 #define MENU_ACT_QUIT      0   
 #define MENU_ACT_NEW_GAME  1   
-#define MENU_ACT_BACK      2   
-#define MENU_ACT_MENU      3   
-#define MENU_ACT_STAIRS    4   
-#define MENU_ACT_DEBUG     5   
+#define MENU_ACT_STAIRS    2   
+#define MENU_ACT_DEBUG     3   
+#define MENU_ACT_BACK      4   
+#define MENU_ACT_NONE      5   

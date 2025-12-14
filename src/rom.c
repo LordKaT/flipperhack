@@ -159,3 +159,18 @@ char* rom_read_string(uint8_t id) {
 
     return string_out;
 }
+
+bool rom_read_data(uint8_t id, uint8_t data_table, void* data_chunk, size_t data_size) {
+    uint8_t offset = (uint32_t)id * data_size;
+    memset(data_chunk, 0, data_size);
+
+    if (!storage_file_seek(g_roms[data_table], offset, true)) {
+        return false;
+    }
+
+    if (storage_file_read(g_roms[data_table], data_chunk, data_size) != data_size) {
+        return false;
+    }
+
+    return true;
+}

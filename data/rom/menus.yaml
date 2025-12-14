@@ -3,6 +3,8 @@
   items:
     - text: STR_NEW_GAME
       action: MENU_ACT_NEW_GAME
+    - text: STR_STAIRS
+      action: MENU_ACT_STAIRS
     - text: STR_QUIT
       action: MENU_ACT_QUIT
 
