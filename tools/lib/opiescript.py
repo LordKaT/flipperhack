@@ -55,6 +55,46 @@ opiescript_instructions = {
         "opcode": 0x24,
         "argtypes": ["reg", "imm"],
     },
+    "MOV": {
+        "argc": 2,
+        "opcode": 0x25,
+        "argtypes": ["reg", "reg"]
+    },
+    "CLR": {
+        "argc": 1,
+        "opcode": 0x26,
+        "argtypes": ["reg"]
+    },
+    "INC": {
+        "argc": 1,
+        "opcode": 0x30,
+        "argtypes": ["reg"],
+    },
+    "DEC": {
+        "argc": 1,
+        "opcode": 0x31,
+        "argtypes": ["reg"],
+    },
+    "ADD": {
+        "argc": 2,
+        "opcode": 0x32,
+        "argtypes": ["reg", "imm"],
+    },
+    "SUB": {
+        "argc": 2,
+        "opcode": 0x33,
+        "argtypes": ["reg", "imm"],
+    },
+    "MUL": {
+        "argc": 2,
+        "opcode": 0x34,
+        "argtypes": ["reg", "imm"],
+    },
+    "DIV": {
+        "argc": 2,
+        "opcode": 0x35,
+        "argtypes": ["reg", "imm"],
+    },
     "END_SCRIPT": {
         "argc": 0,
         "opcode": 0xFF,

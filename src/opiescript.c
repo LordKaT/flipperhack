@@ -119,6 +119,75 @@ void opiescript_run(GameState* state, const char* path) {
                 if (reg < 4)
                     opiescript_zero_flag = (opiescript_regs[reg] == imm);
                 break;
+            
+            case OPIESCRIPT_OP_MOV:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4 && imm < 4)
+                    opiescript_regs[reg] = opiescript_regs[imm];
+                break;
+            
+            case OPIESCRIPT_OP_CLR:
+                if (pc >= end)
+                    break;
+                reg = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg] = 0;
+                break;
+            
+            case OPIESCRIPT_OP_INC:
+                if (pc >= end)
+                    break;
+                reg = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg]++;
+                break;
+            
+            case OPIESCRIPT_OP_DEC:
+                if (pc >= end)
+                    break;
+                reg = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg]--;
+                break;
+            
+            case OPIESCRIPT_OP_ADD:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg] += imm;
+                break;
+            
+            case OPIESCRIPT_OP_SUB:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg] -= imm;
+                break;
+            
+            case OPIESCRIPT_OP_MUL:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg] *= imm;
+                break;
+            
+            case OPIESCRIPT_OP_DIV:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg] /= imm;
+                break;
 
             case OPIESCRIPT_OP_END_SCRIPT:
                 break;

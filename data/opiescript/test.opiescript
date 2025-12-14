@@ -4,6 +4,11 @@ main:
     JMP     skip
     LOADI   R0 10
 skip:
+    ADD     R1 10
+    ADD     R2 20
+    MOV     R1 R2
+    MOV     R0 R1
+    MUL     R0 2
     LOGR    R0
 
 END_SCRIPT
