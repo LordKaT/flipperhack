@@ -30,6 +30,7 @@ static inline void game_init(GameState* state) {
 void game_mode_title(GameState* state, InputKey key) {
     if (key == InputKeyOk) {
         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_CREATE_CHARACTER);
+        menu_init(&state->menu, MENU_MAIN);
     } else if (key == InputKeyBack) {
         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
     }
@@ -37,11 +38,13 @@ void game_mode_title(GameState* state, InputKey key) {
 }
 
 void game_mode_create_character(GameState* state, InputKey key) {
+    /*
     if (key == InputKeyOk) {
         state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
         game_init(state);
     }
-    return;
+    */
+    game_mode_menu(state, key);
 }
 
 void game_mode_playing(GameState* state, InputKey key, InputType type) {
@@ -88,7 +91,7 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
         case InputKeyOk:
             if (type == InputTypeLong) {
                 state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
-                menu_init(&state->menu, 0);
+                menu_init(&state->menu, MENU_GAME);
                 return;
             } else if (type == InputTypeShort) {
                 moved = true;
@@ -97,7 +100,7 @@ void game_mode_playing(GameState* state, InputKey key, InputType type) {
         case InputKeyBack:
             if (type == InputTypeShort) {
                 state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
-                menu_init(&state->menu, 0);
+                menu_init(&state->menu, MENU_GAME);
                 return;
             } else if (type == InputTypeLong) {
                 state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
@@ -226,7 +229,13 @@ void game_mode_menu(GameState* state, InputKey key) {
 
     switch (selection) {
         case MENU_ACT_QUIT:
-            state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
+            if (splitbyte_get_low(state->enemy_and_mode) == GAME_MODE_CREATE_CHARACTER)
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_QUIT);
+            else
+                state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_CREATE_CHARACTER);
+            break;
+        case MENU_ACT_NEW_GAME:
+            game_init(state);
             break;
         case MENU_ACT_BACK: // Back/empty selection (error?)
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
@@ -249,7 +258,6 @@ void game_mode_menu(GameState* state, InputKey key) {
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
             break;
         case MENU_ACT_DEBUG:
-            FURI_LOG_I("MODE", "MENU_ACT_DEBUG");
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
             menu_init(&state->menu, MENU_DEBUG);
             break;

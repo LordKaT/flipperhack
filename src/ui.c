@@ -108,7 +108,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
 
     if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CREATE_CHARACTER) {
-        canvas_draw_str(canvas, 10, 10, "Menu menu (one day)");
+        menu_draw(canvas, &state->menu);
         return;
     }
     

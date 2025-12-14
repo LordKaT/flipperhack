@@ -45,6 +45,7 @@ string_entries = [
     ("STR_GAME_MENU",           "Game Menu"),
     ("STR_DEBUG",               "Debug"),
     ("STR_BACK",                "Back"),
+    ("STR_EXIT",                "Exit"),
 
     ("STR_GOBLIN",              "Goblin"),
 

@@ -47,7 +47,8 @@ static inline void handle_input(GameState* state, InputKey key, InputType type) 
             game_mode_direction_select(state, key);
             break;
         case GAME_MODE_CREATE_CHARACTER:
-            game_mode_create_character(state, key);
+            //game_mode_create_character(state, key);
+            game_mode_menu(state, key);
             break;
         default:
             break;
