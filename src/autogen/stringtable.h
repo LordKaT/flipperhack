@@ -1,6 +1,6 @@
 #pragma once
 
-// AUTO-GENERATED — DO NOT EDIT
+// AUTO-GENERATED - DO NOT EDIT
 // String IDs for FlipperHack runtime string table
 
 #define STR_FLIPPERHACK          0      // "flipperhack"

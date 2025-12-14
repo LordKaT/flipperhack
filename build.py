@@ -15,6 +15,7 @@ GFX_DIST_DIR = GFX_DIR / "dist"
 
 ROM_DIR = DATA_DIR / "rom"
 ROM_DIST_DIR = ROM_DIR / "dist"
+ROM_OPIESCRIPT_DIR = ROM_DIST_DIR / "opiescript"
 
 TOOLS_DIR = ROOT / "tools"
 
@@ -32,6 +33,10 @@ BUILD_ROMS = TOOLS_DIR / "build_roms.py"
 BUILD_STRINGTABLE = TOOLS_DIR / "build_stringtable.py"
 
 BUILD_MENUTABLE = TOOLS_DIR / "build_menutable.py"
+
+BUILD_OPIESCRIPT = TOOLS_DIR / "build_opiescript.py"
+
+OPIESCRIPT_FILES = ["test.opiescript"]
 
 BUILD_HEADERS = TOOLS_DIR / "build_headers.py"
 
@@ -144,6 +149,21 @@ def build_menutable():
     print(f"[MENUTABLE] Running {BUILD_MENUTABLE.relative_to(ROOT)}")
     run([sys.executable, str(BUILD_MENUTABLE)], cwd=ROOT)
 
+def build_opiescript():
+    if not BUILD_OPIESCRIPT.exists():
+        print("[OPIESCRIPT] tools/build_opiescript.py not found, skipping menutable generation.")
+        return
+
+    ROM_OPIESCRIPT_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"[OPIESCRIPT] Running {BUILD_OPIESCRIPT.relative_to(ROOT)}")
+
+    cmd = [
+        sys.executable,
+        str(BUILD_OPIESCRIPT),
+        *OPIESCRIPT_FILES,
+    ]
+    run(cmd, cwd=ROOT)
+
 def build_headers():
     if not BUILD_HEADERS.exists():
         print("[HEADERS] tools/build_headers.py not found, skipping header generation.")
@@ -158,6 +178,7 @@ def task_assets(_args):
     build_rom_assets()
     build_stringtable()
     build_menutable()
+    build_opiescript()
     build_headers()
     print("[ASSETS] All assets built.")
 

@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 from lib.entries import logic_entries, load_menu_entries, menu_act_entries, string_entries
+from lib.opiescript import opiescript_instructions
 
 menu_entries = load_menu_entries()
 
 string_hdr_path = "src/autogen/stringtable.h"
 menu_hdr_path = "src/autogen/menutable.h"
 logic_hdr_path = "src/autogen/logictable.h"
+os_hdr_path = "src/autogen/opiescript.h"
 
 with open(string_hdr_path, "w") as f:
     f.write("#pragma once\n\n")
-    f.write("// AUTO-GENERATED — DO NOT EDIT\n")
+    f.write("// AUTO-GENERATED - DO NOT EDIT\n")
     f.write("// String IDs for FlipperHack runtime string table\n\n")
 
     max_define_len = max(len(define) for define, _ in string_entries)
@@ -22,7 +24,7 @@ print(f"✓ Wrote header: {string_hdr_path}")
 
 with open(menu_hdr_path, "w") as f:
     f.write("#pragma once\n\n")
-    f.write("// AUTO-GENERATED — DO NOT EDIT\n")
+    f.write("// AUTO-GENERATED - DO NOT EDIT\n")
     f.write("// Menu IDs for FlipperHack runtime menu table\n\n")
 
     max_define_len = max(len(define) for define, _ in menu_entries)
@@ -38,7 +40,7 @@ print(f"✓ Wrote header: {menu_hdr_path}")
 
 with open(logic_hdr_path, "w") as f:
     f.write("#pragma once\n\n")
-    f.write("// AUTO-GENERATED — DO NOT EDIT\n")
+    f.write("// AUTO-GENERATED - DO NOT EDIT\n")
     f.write("// Tile logic bitflags for FlipperHack\n\n")
 
     max_define_len = max(len(name) for name in logic_entries)
@@ -49,3 +51,18 @@ with open(logic_hdr_path, "w") as f:
         )
 
 print(f"✓ Wrote header: {logic_hdr_path}")
+
+with open(os_hdr_path, "w") as f:
+    f.write("#pragma once\n\n")
+    f.write("// AUTO-GENERATED - DO NOT EDIT\n")
+    f.write("// OpieScript\n\n")
+
+    max_define_len = max(len(name) for name in opiescript_instructions)
+
+    for name, spec in opiescript_instructions.items():
+        opcode = spec["opcode"]
+        f.write(
+            f"#define OPIESCRIPT_OP_{name.ljust(max_define_len)} 0x{opcode:02X}u\n"
+        )
+
+print(f"✓ Wrote header: {os_hdr_path}")

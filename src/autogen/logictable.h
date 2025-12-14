@@ -1,6 +1,6 @@
 #pragma once
 
-// AUTO-GENERATED — DO NOT EDIT
+// AUTO-GENERATED - DO NOT EDIT
 // Tile logic bitflags for FlipperHack
 
 #define LOGIC_DESTRUCTABLE  0x00000001u

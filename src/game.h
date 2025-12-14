@@ -14,6 +14,7 @@
 
 #include "autogen/logictable.h"
 #include "autogen/menutable.h"
+#include "autogen/opiescript.h"
 #include "autogen/stringtable.h"
 
 #include "defs.h"

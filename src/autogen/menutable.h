@@ -1,6 +1,6 @@
 #pragma once
 
-// AUTO-GENERATED — DO NOT EDIT
+// AUTO-GENERATED - DO NOT EDIT
 // Menu IDs for FlipperHack runtime menu table
 
 #define MENU_MAIN   0   
