@@ -1,6 +1,7 @@
 #include "menu.h"
 
 void menu_init(Menu* menu, uint8_t menu_id) {
+    FURI_LOG_I("MENU", "menu_init %d", menu_id);
     memset(menu, 0, sizeof(Menu));
     rom_read_data(menu_id, ROM_MENUTABLE, &menu->menu_entry, sizeof(MenuEntry));
     menu->count = 0;

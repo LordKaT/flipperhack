@@ -7,6 +7,8 @@
       action: MENU_ACT_STAIRS
     - text: STR_QUIT
       action: MENU_ACT_QUIT
+    - text: STR_DEBUG
+      action: MENU_ACT_DEBUG
 
 - id: MENU_GAME
   name: STR_GAME_MENU
@@ -39,8 +41,8 @@
 #     - text: STR_BACK
 #       action: MENU_ACT_BACK
 
-# - id: MENU_DEBUG
-#   name: STR_DEBUG
-#   items:
-#     - text: STR_BACK
-#       action: MENU_ACT_BACK
+- id: MENU_DEBUG
+  name: STR_DEBUG
+  items:
+    - text: STR_BACK
+      action: MENU_ACT_BACK

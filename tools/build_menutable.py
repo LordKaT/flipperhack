@@ -2,7 +2,9 @@
 import struct
 import yaml
 
-from lib.entries import menu_entries, menu_act_entries, string_entries
+from lib.entries import load_menu_entries, menu_act_entries, string_entries
+
+menu_entries = load_menu_entries()
 
 MENU_ENTRY_SIZE = 32
 ITEM_ENTRY_SIZE = 16

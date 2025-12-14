@@ -248,6 +248,11 @@ void game_mode_menu(GameState* state, InputKey key) {
                 log_msg(state, rom_read_string(STR_NO_STAIRS));
             state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_PLAYING);
             break;
+        case MENU_ACT_DEBUG:
+            FURI_LOG_I("MODE", "MENU_ACT_DEBUG");
+            state->enemy_and_mode = splitbyte_set_low(state->enemy_and_mode, GAME_MODE_MENU);
+            menu_init(&state->menu, MENU_DEBUG);
+            break;
         case MENU_ACT_NONE:
             break;
         default:

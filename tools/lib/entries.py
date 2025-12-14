@@ -1,3 +1,5 @@
+import yaml
+
 string_entries = [
     ("STR_FLIPPERHACK",         "flipperhack"),
     ("STR_VERSION",             "0.01a"),
@@ -57,15 +59,6 @@ string_entries = [
     ("STR_TELEPORT",            "Teleport"),
 ]
 
-menu_entries = [
-    ("MENU_MAIN",           0x00),
-    ("MENU_GAME",           0x01),
-    ("MENU_EQUIPMENT",      0x02),
-    ("MENU_INVENTORY",      0x03),
-    ("MENU_DEBUG",          0xFE),
-    ("MENU_NULL",           0xFF)
-]
-
 menu_act_entries = [
     ("MENU_ACT_QUIT",       0x00),
     ("MENU_ACT_NEW_GAME",   0x01),
@@ -73,16 +66,6 @@ menu_act_entries = [
     ("MENU_ACT_DEBUG",      0xFD),
     ("MENU_ACT_BACK",       0xFE),
     ("MENU_ACT_NONE",       0xFF)
-]
-
-tile_entries = [
-    ("TILE_WALL",           0),
-    ("TILE_FLOOR",          1),
-    ("TILE_DOOR_OPENED",    2),
-    ("TILE_DOOR_CLOSED",    3),
-    ("TILE_STAIRS_UP",      4),
-    ("TILE_STAIRS_DOWN",    5),
-    ("TILE_TELEPORT",       6),
 ]
 
 logic_entries = {
@@ -94,3 +77,23 @@ logic_entries = {
     "LOGIC_TELEPORT":       1 << 5,
     "LOGIC_SCRIPT":         1 << 31
 }
+
+def load_menu_entries(path="data/rom/menus.yaml"):
+    with open(path, "r") as f:
+        menus = yaml.safe_load(f)
+
+    entries = []
+    for i, menu in enumerate(menus):
+        define = menu["id"]
+        entries.append((define, i))
+
+    entries.append(("MENU_NULL", 0xFF))
+    return entries
+
+def load_tile_entries(path="data/rom/tiles.yaml"):
+    with open(path, "r") as f:
+        tiles = yaml.safe_load(f)
+    
+    entries = []
+    for i, menu in enumerate(menus):
+        define = tile["id"]

@@ -108,11 +108,7 @@ void ui_render(Canvas* canvas, GameState* state) {
     }
 
     if (splitbyte_get(state->enemy_and_mode, SPLITBYTE_MODE) == GAME_MODE_CREATE_CHARACTER) {
-        MenuEntry menu_entry;
-        rom_read_data(0, ROM_MENUTABLE, &menu_entry, sizeof(MenuEntry));
-        char temp[ROM_STRING_SIZE];
-        memcpy(temp, rom_read_string(menu_entry.name_id), ROM_STRING_SIZE);
-        canvas_draw_str(canvas, 10, 10, temp);
+        canvas_draw_str(canvas, 10, 10, "Menu menu (one day)");
         return;
     }
     

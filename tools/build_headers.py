@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-from lib.entries import logic_entries, menu_entries, menu_act_entries, string_entries
+from lib.entries import logic_entries, load_menu_entries, menu_act_entries, string_entries
+
+menu_entries = load_menu_entries()
 
 string_hdr_path = "src/autogen/stringtable.h"
 menu_hdr_path = "src/autogen/menutable.h"
