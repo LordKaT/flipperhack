@@ -32,6 +32,7 @@
 #include "ui.h"
 #include "rom.h"
 #include "cursor.h"
+#include "opiescript.h"
 
 extern uint8_t move_entity(GameState* state, uint32_t* dynamic_data, int dx, int dy);
 extern void attack_player_on_enemy(GameState* state, Enemy *enemy);

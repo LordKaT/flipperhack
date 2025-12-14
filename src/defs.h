@@ -60,3 +60,5 @@
 #define MENU_MAX_ITEMS      15
 #define MENU_MAX_STACK      8
 #define MENU_VISIBLE_LINES  8
+
+#define OPIESCRIPT_MAX_SIZE 256 // for now
