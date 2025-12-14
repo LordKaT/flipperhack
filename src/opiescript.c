@@ -1,14 +1,20 @@
 #include "opiescript.h"
 
+uint32_t opiescript_regs[4];
+
+static inline void opiescript_cleanup(File* file) {
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+}
+
 void opiescript_run(GameState* state, const char* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
     if (!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         FURI_LOG_E("OpieScript", rom_read_string(STR_OPEN_FAIL));
-        storage_file_close(file);
-        storage_file_free(file);
-        furi_record_close(RECORD_STORAGE);
+        opiescript_cleanup(file);
     }
 
     uint8_t buffer[OPIESCRIPT_MAX_SIZE];
@@ -19,27 +25,61 @@ void opiescript_run(GameState* state, const char* path) {
 
     while (pc < end) {
         uint8_t opcode = *pc++;
+        uint8_t reg = 0;
+        uint8_t imm = 0;
 
         switch (opcode) {
             case OPIESCRIPT_OP_LOG:
                 if (pc >= end)
-                    return; // malformed
-                uint8_t str_id = *pc++;
-                log_msg(state, rom_read_string(str_id));
+                    break;
+                imm = *pc++;
+                log_msg(state, rom_read_string(imm));
                 break;
+
+            case OPIESCRIPT_OP_LOADI:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_regs[reg] = imm;
+                break;
+
+            case OPIESCRIPT_OP_LOADP:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                //if (reg < 4)
+                //    opiescript_regs[reg] = player_get_stat(state, imm);
+                break;
+
+            case OPIESCRIPT_OP_STOREP:
+                if (pc + 2 > end)
+                    break;
+                imm = *pc++;
+                reg  = *pc++;
+                //if (reg < 4)
+                //    player_set_stat(state, imm, opiescript_regs[reg]);
+                break;
+
+            case OPIESCRIPT_OP_LOGR:
+                if (pc >= end)
+                    break;
+                reg = *pc++;
+                if (reg < 4) {
+                    log_msg(state, "R%d: %lu", reg, opiescript_regs[reg]);
+                    FURI_LOG_I("OpieScript", "R%d: %lu", reg, opiescript_regs[reg]);
+                }
+                break;
+
             case OPIESCRIPT_OP_END_SCRIPT:
-                storage_file_close(file);
-                storage_file_free(file);
-                furi_record_close(RECORD_STORAGE);
-                return;
+                break;
+
             default:
-                storage_file_close(file);
-                storage_file_free(file);
-                furi_record_close(RECORD_STORAGE);
-                return;
+                FURI_LOG_E("OpieScript", "%s%d", rom_read_string(STR_INVALID_OPCODE), opcode);
+                break;
         }
     }
-    storage_file_close(file);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
+    opiescript_cleanup(file);
 }

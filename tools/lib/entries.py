@@ -13,6 +13,7 @@ string_entries = [
     ("STR_RECORD_STORAGE_FAIL", "RECORD_STORAGE fail!"),
     ("STR_ROM_FAIL",            "ROM Fail!"),
     ("STR_MISSING_IMAGE",       "Missing/Bad image!"),
+    ("STR_INVALID_OPCODE",      "Invalid OpieScript opcode: "),
 
     ("STR_GFX_DIR",             "/ext/apps_data/flipperhack/gfx/"),
     ("STR_TITLE_BIN",           "title.bin"),
