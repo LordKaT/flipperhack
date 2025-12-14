@@ -1,6 +1,13 @@
 #include "opiescript.h"
 
 uint32_t opiescript_regs[4];
+bool opiescript_zero_flag;
+
+static inline void opiescript_init() {
+    for (uint8_t i = 0; i < 4; i++)
+        opiescript_regs[i] = 0;
+    opiescript_zero_flag = false;
+}
 
 static inline void opiescript_cleanup(File* file) {
     storage_file_close(file);
@@ -27,6 +34,7 @@ void opiescript_run(GameState* state, const char* path) {
         uint8_t opcode = *pc++;
         uint8_t reg = 0;
         uint8_t imm = 0;
+        int32_t offset = 0;
 
         switch (opcode) {
             case OPIESCRIPT_OP_LOG:
@@ -67,10 +75,49 @@ void opiescript_run(GameState* state, const char* path) {
                 if (pc >= end)
                     break;
                 reg = *pc++;
-                if (reg < 4) {
-                    log_msg(state, "R%d: %lu", reg, opiescript_regs[reg]);
+                if (reg < 4)
                     FURI_LOG_I("OpieScript", "R%d: %lu", reg, opiescript_regs[reg]);
-                }
+                break;
+            
+            case OPIESCRIPT_OP_CMP:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4 && imm < 4)
+                    opiescript_zero_flag = (opiescript_regs[reg] == opiescript_regs[imm]);
+                break;
+            
+            case OPIESCRIPT_OP_JMP:
+                if (pc >= end)
+                    break;
+                offset = *pc++;
+                pc += offset;
+                break;
+            
+            case OPIESCRIPT_OP_JNZ:
+                if (pc >= end)
+                    break;
+                offset = *pc++;
+                if (!opiescript_zero_flag)
+                    pc += offset;
+                break;
+            
+            case OPIESCRIPT_OP_JZ:
+                if (pc >= end)
+                    break;
+                offset = *pc++;
+                if (opiescript_zero_flag)
+                    pc += offset;
+                break;
+
+            case OPIESCRIPT_OP_CMPI:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_zero_flag = (opiescript_regs[reg] == imm);
                 break;
 
             case OPIESCRIPT_OP_END_SCRIPT:

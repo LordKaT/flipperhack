@@ -1,6 +1,10 @@
 import sys
 
 opiescript_instructions = {
+    "NOP": {
+        "argc": 0,
+        "opcode": 0x00,
+    },
     "LOG": {
         "argc": 1,
         "opcode": 0x01,
@@ -25,6 +29,31 @@ opiescript_instructions = {
         "argc": 1,
         "opcode": 0x13,
         "argtypes": ["reg"],
+    },
+    "CMP": {
+        "argc": 2,
+        "opcode": 0x20,
+        "argtypes": ["reg", "reg"],
+    },
+    "JMP": {
+        "argc": 1,
+        "opcode": 0x21,
+        "argtypes": ["rel8"],
+    },
+    "JNZ": {
+        "argc": 1,
+        "opcode": 0x22,
+        "argtypes": ["rel8"],
+    },
+    "JZ": {
+        "argc": 1,
+        "opcode": 0x23,
+        "argtypes": ["rel8"],
+    },
+    "CMPI": {
+        "argc": 2,
+        "opcode": 0x24,
+        "argtypes": ["reg", "imm"],
     },
     "END_SCRIPT": {
         "argc": 0,
@@ -70,10 +99,37 @@ def opiescript_tokenizer(source: str):
 
         yield lineno, line.split()
 
+def opiescript_collect_labels(source: str, instr_table: dict):
+    labels = {}
+    pc = 0
+
+    for lineno, tokens in opiescript_tokenizer(source):
+        # label definition
+        if tokens[0].endswith(":"):
+            label = tokens[0][:-1]
+            if label in labels:
+                opiescript_error(lineno, f"duplicate label: {label}")
+            labels[label] = pc
+            continue
+
+        mnemonic = tokens[0]
+        if mnemonic not in instr_table:
+            opiescript_error(lineno, f"unknown instruction: {mnemonic}")
+
+        instr = instr_table[mnemonic]
+        pc += 1 + instr["argc"]
+
+    return labels
+
 def opiescript_assembler(source: str, instr_table: dict, string_symbols: dict):
     bytecode = bytearray()
 
+    labels = opiescript_collect_labels(source, instr_table)
+
     for lineno, tokens in opiescript_tokenizer(source):
+        if tokens[0].endswith(":"):
+            continue
+
         mnemonic = tokens[0]
 
         if mnemonic not in instr_table:
@@ -91,6 +147,7 @@ def opiescript_assembler(source: str, instr_table: dict, string_symbols: dict):
         for arg, argtype in zip(tokens[1:], argtypes):
             if argtypes and len(argtypes) != argc:
                 opiescript_error(lineno, f"{mnemonic} argtypes mismatch (argc={argc}, argtypes={len(argtypes)})")
+
             if argtype == "reg":
                 if arg not in opiescript_register_symbols:
                     opiescript_error(lineno, f"unknown register: {arg}")
@@ -111,6 +168,18 @@ def opiescript_assembler(source: str, instr_table: dict, string_symbols: dict):
                 if arg not in string_symbols:
                     opiescript_error(lineno, f"unknown string: {arg}")
                 bytecode.append(string_symbols[arg])
+            
+            elif argtype == "rel8":
+                # arg can be number OR label
+                if arg in labels:
+                    label_pc = labels[arg]
+                    next_pc = len(bytecode) + 1  # +1 for rel8 byte
+                    offset = label_pc - next_pc
+                else:
+                    offset = int(arg, 0)
+                if not (-2147483647  <= offset <= 2147483647):
+                    opiescript_error(lineno, f"rel8 offset out of range")
+                bytecode.append(offset & 0xFF)
 
     # We are very opinionated
     end_opcode = instr_table["END_SCRIPT"]["opcode"]

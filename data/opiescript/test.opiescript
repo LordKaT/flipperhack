@@ -1,4 +1,9 @@
-LOG     STR_WELCOME
-LOADI   R0 10
-LOGR    R0
+main:
+    LOG     STR_WELCOME
+    LOADI   R0 55
+    JMP     skip
+    LOADI   R0 10
+skip:
+    LOGR    R0
+
 END_SCRIPT
