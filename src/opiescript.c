@@ -20,7 +20,7 @@ void opiescript_run(GameState* state, const char* path) {
     File* file = storage_file_alloc(storage);
 
     if (!storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        FURI_LOG_E("OpieScript", rom_read_string(STR_OPEN_FAIL));
+        FURI_LOG_E(rom_read_string(STR_OPIESCRIPT), rom_read_string(STR_OPEN_FAIL));
         opiescript_cleanup(file);
     }
 
@@ -76,7 +76,7 @@ void opiescript_run(GameState* state, const char* path) {
                     break;
                 reg = *pc++;
                 if (reg < 4)
-                    FURI_LOG_I("OpieScript", "R%d: %lu", reg, opiescript_regs[reg]);
+                    FURI_LOG_I(rom_read_string(STR_OPIESCRIPT), "R%d: %lu", reg, opiescript_regs[reg]);
                 break;
             
             case OPIESCRIPT_OP_CMP:
@@ -136,7 +136,33 @@ void opiescript_run(GameState* state, const char* path) {
                 if (reg < 4)
                     opiescript_regs[reg] = 0;
                 break;
+
+            case OPIESCRIPT_OP_TEST:
+                if (pc >= end)
+                    break;
+                reg = *pc++;
+                if (reg < 4)
+                    opiescript_zero_flag = (opiescript_regs[reg] == 0);
+                break;
             
+            case OPIESCRIPT_OP_CMPLT:
+                if (pc + 2 > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_zero_flag = (opiescript_regs[reg] < imm)
+                break;
+            
+            case OPIESCRIPT_OP_CMPGT:
+                if (pc + 2  > end)
+                    break;
+                reg = *pc++;
+                imm = *pc++;
+                if (reg < 4)
+                    opiescript_zero_flag = (opiescript_regs[reg] > imm)
+                break;
+
             case OPIESCRIPT_OP_INC:
                 if (pc >= end)
                     break;
@@ -193,7 +219,7 @@ void opiescript_run(GameState* state, const char* path) {
                 break;
 
             default:
-                FURI_LOG_E("OpieScript", "%s%d", rom_read_string(STR_INVALID_OPCODE), opcode);
+                FURI_LOG_E(rom_read_string(STR_OPIESCRIPT), "%s%d", rom_read_string(STR_INVALID_OPCODE), opcode);
                 break;
         }
     }

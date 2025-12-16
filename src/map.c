@@ -313,8 +313,8 @@ void map_generate(GameState* state) {
 void map_place_player(GameState* state) {
     // Find first floor tile
     Player* player = &state->player;
-    for(int x = 0; x < MAP_WIDTH; x++) {
-        for(int y = 0; y < MAP_HEIGHT; y++) {
+    for (int x = 0; x < MAP_WIDTH; x++) {
+        for (int y = 0; y < MAP_HEIGHT; y++) {
             if (state->map.tiles[x][y].type == TILE_FLOOR) {
                 dynamicdata_set_x(&player->dynamic_data, x);
                 dynamicdata_set_y(&player->dynamic_data, y);

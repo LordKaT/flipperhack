@@ -65,6 +65,11 @@ opiescript_instructions = {
         "opcode": 0x26,
         "argtypes": ["reg"]
     },
+    "TEST": {
+        "argc": 1,
+        "opcode": 0x27,
+        "argtypes": ["reg"],
+    },
     "INC": {
         "argc": 1,
         "opcode": 0x30,
